@@ -61,8 +61,12 @@ public enum ColumnType {
         if (name == null) {
             throw new IllegalStateException("Column type is required");
         }
+        String normalized = name.trim().toUpperCase();
+        if ("NUMERIC".equals(normalized)) {
+            return DECIMAL;
+        }
         try {
-            return ColumnType.valueOf(name.trim().toUpperCase());
+            return ColumnType.valueOf(normalized);
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException("Unknown column type: " + name);
         }

@@ -21,25 +21,25 @@ class LeadCodeSequenceServiceTest {
     private final LeadCodeSequenceService service = new LeadCodeSequenceService(repository);
 
     @Test
-    @DisplayName("generates formatted lead code with company prefix and 6-digit zero padding")
+    @DisplayName("generates formatted lead code with prefix and 5-digit zero padding")
     void generatesFormattedLeadCode() {
-        UUID companyId = UUID.randomUUID();
-        when(repository.reserveNext(companyId)).thenReturn(42L);
+        String companyId = UUID.randomUUID().toString();
+        when(repository.reserveNext(companyId, "LED")).thenReturn(42L);
 
-        String code = service.generateNextCode(companyId);
+        String code = service.reserveNextCode(companyId, null);
 
-        assertThat(code).isEqualTo("LEAD-000042");
-        verify(repository, times(1)).reserveNext(companyId);
+        assertThat(code).isEqualTo("LED-00042");
+        verify(repository, times(1)).reserveNext(companyId, "LED");
     }
 
     @Test
-    @DisplayName("formats high sequence numbers correctly")
+    @DisplayName("formats high sequence numbers correctly with custom prefix")
     void formatsLargeSequenceNumber() {
-        UUID companyId = UUID.randomUUID();
-        when(repository.reserveNext(companyId)).thenReturn(1234567L);
+        String companyId = UUID.randomUUID().toString();
+        when(repository.reserveNext(companyId, "MKT")).thenReturn(12345L);
 
-        String code = service.generateNextCode(companyId);
+        String code = service.reserveNextCode(companyId, "MKT");
 
-        assertThat(code).isEqualTo("LEAD-1234567");
+        assertThat(code).isEqualTo("MKT-12345");
     }
 }

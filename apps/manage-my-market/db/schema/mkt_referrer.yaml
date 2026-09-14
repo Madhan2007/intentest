@@ -40,11 +40,11 @@ columns:
     nullable: false
     default: "0"
   - name: rewards_paid_total
-    type: numeric
+    type: decimal
     nullable: false
     default: "0"
   - name: rewards_pending_total
-    type: numeric
+    type: decimal
     nullable: false
     default: "0"
   - name: joined_at

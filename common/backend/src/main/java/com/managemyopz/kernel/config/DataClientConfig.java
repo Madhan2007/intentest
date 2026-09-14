@@ -22,6 +22,7 @@ import org.springframework.context.annotation.Configuration;
 public class DataClientConfig {
 
     @Bean
+    @org.springframework.context.annotation.Primary
     public DataClient dataClient(PlatformProperties props, CommandCatalog commandCatalog, MemoryCommandRegistry memoryCommandRegistry) {
         String type = props.getDb().getType();
         return switch (type) {

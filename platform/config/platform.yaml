@@ -99,6 +99,13 @@ databases:
     user: erp_app
     password: ${POSTGRES_PASSWORD:devpassword}
     pool_max: 8
+  OPZMARKET:
+    host: postgres
+    port: 5432
+    database: opzmarket
+    user: erp_app
+    password: ${POSTGRES_PASSWORD:devpassword}
+    pool_max: 8
 
 cache:
   type: memory                    # memory in dev; valkey in staging/prod
@@ -154,7 +161,7 @@ python:
       prefer_gpu: false
 
 modules:
-  enabled: [identity, admin, crud, licensing, apps]
+  enabled: [identity, admin, crud, licensing, apps, dashboard-layout, manage-my-market]
   disabled: []
 
 logging:

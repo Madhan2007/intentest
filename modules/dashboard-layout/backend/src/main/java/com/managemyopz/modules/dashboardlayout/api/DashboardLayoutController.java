@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(DashboardLayoutConstants.API_PREFIX)
@@ -52,7 +53,7 @@ public class DashboardLayoutController {
         SessionAuthentication session = requireSession(authentication);
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        Optional<DashboardLayout> layout = layoutService.getRoleLayout(session.getCompanyId(), appKey, roleKey);
+        Optional<DashboardLayout> layout = layoutService.getRoleLayout(parseCompanyId(session.getCompanyId()), appKey, roleKey);
         if (layout.isEmpty()) {
             return ResponseEntity.ok(ApiEnvelope.ok(Map.of(), correlationId(request)));
         }
@@ -78,12 +79,12 @@ public class DashboardLayoutController {
         try {
             String json = objectMapper.writeValueAsString(body.layoutData() != null ? body.layoutData() : Map.of());
             layoutService.saveRoleLayout(
-                    session.getCompanyId(),
+                    parseCompanyId(session.getCompanyId()),
                     body.appKey(),
                     body.roleKey(),
                     body.templateKey(),
                     json,
-                    session.getUserId()
+                    parseUserId(session.getUserId())
             );
             return ResponseEntity.ok(ApiEnvelope.ok(Map.of("saved", true), correlationId(request)));
         } catch (Exception ex) {
@@ -102,11 +103,11 @@ public class DashboardLayoutController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         layoutService.applyTemplate(
-                session.getCompanyId(),
+                parseCompanyId(session.getCompanyId()),
                 body.appKey(),
                 body.roleKey(),
                 body.templateKey(),
-                session.getUserId()
+                parseUserId(session.getUserId())
         );
         return ResponseEntity.ok(ApiEnvelope.ok(Map.of("applied", true), correlationId(request)));
     }
@@ -121,8 +122,11 @@ public class DashboardLayoutController {
         SessionAuthentication session = requireSession(authentication);
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        String primaryRole = !session.getRoles().isEmpty() ? session.getRoles().getFirst() : "viewer";
-        String layoutJson = layoutService.getMyLayout(session.getUserId(), session.getCompanyId(), appKey, primaryRole);
+        String primaryRole = session.getAuthorities().stream()
+                .map(a -> a.getAuthority().replace("ROLE_", "").toLowerCase())
+                .findFirst()
+                .orElse("viewer");
+        String layoutJson = layoutService.getMyLayout(parseUserId(session.getUserId()), parseCompanyId(session.getCompanyId()), appKey, primaryRole);
 
         try {
             Map<String, Object> data = objectMapper.readValue(layoutJson, MAP_TYPE);
@@ -144,7 +148,7 @@ public class DashboardLayoutController {
 
         try {
             String json = objectMapper.writeValueAsString(body.layoutData() != null ? body.layoutData() : Map.of());
-            layoutService.saveMyLayout(session.getUserId(), session.getCompanyId(), body.appKey(), json);
+            layoutService.saveMyLayout(parseUserId(session.getUserId()), parseCompanyId(session.getCompanyId()), body.appKey(), json);
             return ResponseEntity.ok(ApiEnvelope.ok(Map.of("saved", true), correlationId(request)));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
@@ -161,8 +165,26 @@ public class DashboardLayoutController {
         SessionAuthentication session = requireSession(authentication);
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        layoutService.resetMyLayout(session.getUserId(), session.getCompanyId(), appKey);
+        layoutService.resetMyLayout(parseUserId(session.getUserId()), parseCompanyId(session.getCompanyId()), appKey);
         return ResponseEntity.ok(ApiEnvelope.ok(Map.of("reset", true), correlationId(request)));
+    }
+
+    private static UUID parseCompanyId(String companyId) {
+        if (companyId == null || companyId.isBlank()) return null;
+        try {
+            return UUID.fromString(companyId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    private static UUID parseUserId(String userId) {
+        if (userId == null || userId.isBlank()) return null;
+        try {
+            return UUID.fromString(userId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static SessionAuthentication requireSession(Authentication authentication) {

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,21 +32,21 @@ class LeadServiceTest {
     @Test
     @DisplayName("creates new lead with generated sequence code and logs initial activity")
     void createsLeadSuccessfully() {
-        UUID companyId = UUID.randomUUID();
-        when(sequenceService.generateNextCode(companyId)).thenReturn("LEAD-000001");
+        String companyId = UUID.randomUUID().toString();
+        when(sequenceService.reserveNextCode(companyId, "LED")).thenReturn("LED-00001");
 
         Lead created = service.createLead(
                 companyId,
                 "Acme Corp Lead",
-                "INBOUND_WEB",
+                "MANUAL",
                 "John",
                 "Doe",
                 "Acme Corp",
                 "john@acme.com",
                 "+1234567890",
                 "Pricing page form",
-                BigDecimal.valueOf(25000),
-                "HIGH",
+                25000,
+                "HOT",
                 null,
                 "agent-1",
                 "creator-1",
@@ -53,17 +54,17 @@ class LeadServiceTest {
         );
 
         assertThat(created).isNotNull();
-        assertThat(created.leadCode()).isEqualTo("LEAD-000001");
+        assertThat(created.leadCode()).isEqualTo("LED-00001");
         assertThat(created.displayName()).isEqualTo("Acme Corp Lead");
         assertThat(created.status()).isEqualTo("NEW");
-        assertThat(created.estimatedValue()).isEqualTo(BigDecimal.valueOf(25000));
+        assertThat(created.estimatedValue()).isEqualTo(25000);
 
         verify(repository).insert(any(Lead.class));
         verify(activityService).logActivity(
-                eq(created.id().toString()),
-                eq("CREATED"),
+                eq(created.id()),
+                eq(ManageMyMarketConstants.ACTIVITY_TYPE_NOTE),
                 eq("Lead Created"),
-                contains("pricing page form"),
+                anyString(),
                 isNull(),
                 isNull(),
                 isNull(),
@@ -75,27 +76,27 @@ class LeadServiceTest {
     @Test
     @DisplayName("disqualifies lead with reason and logs disqualification activity")
     void disqualifiesLead() {
-        UUID leadId = UUID.randomUUID();
-        UUID companyId = UUID.randomUUID();
+        String leadId = UUID.randomUUID().toString();
+        String companyId = UUID.randomUUID().toString();
         Lead existing = new Lead(
-                leadId, companyId, "LEAD-000005", "Test Lead", "INBOUND_WEB",
-                "Jane", "Smith", "Smith LLC", "jane@smith.com", "+1000",
-                "web", "NEW", BigDecimal.valueOf(5000), "MEDIUM",
-                null, "owner-1", "creator-1", "notes", null, null
+                leadId, companyId, "LED-00005", "MANUAL",
+                "Jane", "Smith", "Test Lead", "Smith LLC", "jane@smith.com", "+1000",
+                "NEW", "web", 5000, "WARM", 10,
+                null, "owner-1", "creator-1", "notes", Instant.now(), Instant.now()
         );
 
-        when(repository.findById(leadId)).thenReturn(Optional.of(existing));
+        when(repository.findById(leadId, companyId)).thenReturn(Optional.of(existing));
 
-        service.disqualifyLead(leadId.toString(), "Budget constraint", "admin-user");
+        service.disqualify(leadId, companyId, "Budget constraint", "admin-user");
 
-        verify(repository).disqualify(leadId, "Budget constraint");
+        verify(repository).disqualify(leadId, companyId, "Budget constraint");
         verify(activityService).logActivity(
-                eq(leadId.toString()),
-                eq("DISQUALIFIED"),
+                eq(leadId),
+                eq(ManageMyMarketConstants.ACTIVITY_TYPE_STATUS_CHANGE),
                 eq("Lead Disqualified"),
-                contains("Budget constraint"),
-                isNull(),
-                isNull(),
+                eq("Reason: Budget constraint"),
+                eq("NEW"),
+                eq("DISQUALIFIED"),
                 isNull(),
                 isNull(),
                 eq("admin-user")

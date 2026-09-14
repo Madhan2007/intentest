@@ -17,7 +17,7 @@ columns:
     type: uuid
     nullable: true
   - name: amount
-    type: numeric
+    type: decimal
     nullable: false
   - name: status
     type: text

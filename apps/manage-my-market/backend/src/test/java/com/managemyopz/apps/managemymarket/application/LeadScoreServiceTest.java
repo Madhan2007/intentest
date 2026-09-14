@@ -23,33 +23,18 @@ class LeadScoreServiceTest {
     private final LeadScoreService service = new LeadScoreService(repository);
 
     @Test
-    @DisplayName("records score and clamps between 0 and 100")
-    void recordsScoreClamped() {
-        UUID leadId = UUID.randomUUID();
-        service.updateScore(leadId, 120, 150, "HIGH", "VIP prospect");
+    @DisplayName("upserts lead score with breakdown JSON")
+    void recordsScore() {
+        String leadId = UUID.randomUUID().toString();
+        service.upsertScore(leadId, 85, "{\"profile\": 40, \"engagement\": 45}");
 
         ArgumentCaptor<LeadScore> captor = ArgumentCaptor.forClass(LeadScore.class);
         verify(repository).upsert(captor.capture());
 
         LeadScore saved = captor.getValue();
         assertThat(saved.leadId()).isEqualTo(leadId);
-        assertThat(saved.score()).isEqualTo(100);
-        assertThat(saved.engagementScore()).isEqualTo(100);
-        assertThat(saved.fitGrade()).isEqualTo("HIGH");
-        assertThat(saved.factorsSummary()).isEqualTo("VIP prospect");
-    }
-
-    @Test
-    @DisplayName("adjusts engagement score correctly on activity events")
-    void adjustsEngagementScore() {
-        UUID leadId = UUID.randomUUID();
-        service.recordActivityEngagement(leadId, 25, "Email opened and clicked link");
-
-        ArgumentCaptor<LeadScore> captor = ArgumentCaptor.forClass(LeadScore.class);
-        verify(repository).upsert(captor.capture());
-
-        LeadScore saved = captor.getValue();
-        assertThat(saved.leadId()).isEqualTo(leadId);
-        assertThat(saved.engagementScore()).isEqualTo(25);
+        assertThat(saved.score()).isEqualTo(85);
+        assertThat(saved.breakdownJson()).isEqualTo("{\"profile\": 40, \"engagement\": 45}");
+        assertThat(saved.updatedAt()).isNotNull();
     }
 }

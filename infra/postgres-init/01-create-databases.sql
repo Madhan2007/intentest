@@ -13,6 +13,10 @@ WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'opzmain')\gexec
 SELECT 'CREATE DATABASE opzhub OWNER erp_app'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'opzhub')\gexec
 
+SELECT 'CREATE DATABASE opzmarket OWNER erp_app'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'opzmarket')\gexec
+
 GRANT ALL PRIVILEGES ON DATABASE opzuser TO erp_app;
 GRANT ALL PRIVILEGES ON DATABASE opzmain TO erp_app;
 GRANT ALL PRIVILEGES ON DATABASE opzhub TO erp_app;
+GRANT ALL PRIVILEGES ON DATABASE opzmarket TO erp_app;

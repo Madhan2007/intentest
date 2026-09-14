@@ -30,33 +30,23 @@ import org.springframework.core.io.ResourceLoader;
 public class DashboardLayoutAutoConfiguration {
 
     @Bean
-    public DataClient dashboardMainDataClient(DataClientRegistry dataClientRegistry) {
-        return dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_MAIN);
+    public WidgetCatalogRepository widgetCatalogRepository(DataClientRegistry dataClientRegistry) {
+        return new DataClientWidgetCatalogRepository(dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_MAIN));
     }
 
     @Bean
-    public DataClient dashboardHubDataClient(DataClientRegistry dataClientRegistry) {
-        return dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_HUB);
+    public DashboardTemplateRepository dashboardTemplateRepository(DataClientRegistry dataClientRegistry) {
+        return new DataClientDashboardTemplateRepository(dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_MAIN));
     }
 
     @Bean
-    public WidgetCatalogRepository widgetCatalogRepository(DataClient dashboardMainDataClient) {
-        return new DataClientWidgetCatalogRepository(dashboardMainDataClient);
+    public DashboardLayoutRepository dashboardLayoutRepository(DataClientRegistry dataClientRegistry) {
+        return new DataClientDashboardLayoutRepository(dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_HUB));
     }
 
     @Bean
-    public DashboardTemplateRepository dashboardTemplateRepository(DataClient dashboardMainDataClient) {
-        return new DataClientDashboardTemplateRepository(dashboardMainDataClient);
-    }
-
-    @Bean
-    public DashboardLayoutRepository dashboardLayoutRepository(DataClient dashboardHubDataClient) {
-        return new DataClientDashboardLayoutRepository(dashboardHubDataClient);
-    }
-
-    @Bean
-    public DashboardLayoutUserRepository dashboardLayoutUserRepository(DataClient dashboardHubDataClient) {
-        return new DataClientDashboardLayoutUserRepository(dashboardHubDataClient);
+    public DashboardLayoutUserRepository dashboardLayoutUserRepository(DataClientRegistry dataClientRegistry) {
+        return new DataClientDashboardLayoutUserRepository(dataClientRegistry.forDatabase(DashboardLayoutConstants.DATABASE_HUB));
     }
 
     @Bean

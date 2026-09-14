@@ -4,6 +4,7 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /src
 COPY common/backend ./common/backend
 COPY modules ./modules
+COPY apps ./apps
 COPY platform ./platform
 WORKDIR /src/common/backend
 RUN --mount=type=cache,target=/root/.m2 mvn -q -DskipTests clean package

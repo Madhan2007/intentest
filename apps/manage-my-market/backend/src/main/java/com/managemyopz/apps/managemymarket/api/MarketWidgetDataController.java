@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @RestController
@@ -42,7 +43,7 @@ public class MarketWidgetDataController {
         SessionAuthentication session = requireSession(authentication);
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
-        Object data = resolveWidgetData(widgetKey, session.getCompanyId());
+        Object data = resolveWidgetData(widgetKey, parseCompanyId(session.getCompanyId()));
         return ResponseEntity.ok(ApiEnvelope.ok(data, correlationId(request)));
     }
 
@@ -58,7 +59,7 @@ public class MarketWidgetDataController {
         Map<String, Object> result = new LinkedHashMap<>();
         if (widgetKeys != null) {
             for (String key : widgetKeys) {
-                result.put(key, resolveWidgetData(key, session.getCompanyId()));
+                result.put(key, resolveWidgetData(key, parseCompanyId(session.getCompanyId())));
             }
         }
         return ResponseEntity.ok(ApiEnvelope.ok(result, correlationId(request)));
@@ -67,12 +68,12 @@ public class MarketWidgetDataController {
     private Object resolveWidgetData(String widgetKey, UUID companyId) {
         return switch (widgetKey) {
             case "mkt-kpi-leads" -> {
-                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId));
-                yield row.map(r -> Map.of(
+                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId != null ? companyId : ""));
+                yield row.map(r -> Map.<String, Object>of(
                         "total_leads", r.getLong("total_leads"),
                         "new_leads_today", r.getLong("new_leads_today"),
                         "total_estimated_value", r.getDecimal("total_estimated_value")
-                )).orElse(Map.of("total_leads", 0, "new_leads_today", 0, "total_estimated_value", 0));
+                )).orElse(Map.<String, Object>of("total_leads", 0L, "new_leads_today", 0L, "total_estimated_value", BigDecimal.ZERO));
             }
             case "mkt-kpi-conversion" -> {
                 List<Map<String, Object>> convRows = reportService.getLeadConversionRate(companyId, null, null);
@@ -83,21 +84,21 @@ public class MarketWidgetDataController {
                     if (row.get("converted_leads") instanceof Number n) won += n.longValue();
                 }
                 double rate = total > 0 ? ((double) won / total) * 100.0 : 0.0;
-                yield Map.of("total_leads", total, "won_leads", won, "conversion_rate_pct", Math.round(rate * 100.0) / 100.0);
+                yield Map.<String, Object>of("total_leads", total, "won_leads", won, "conversion_rate_pct", Math.round(rate * 100.0) / 100.0);
             }
             case "mkt-kpi-campaigns" -> {
-                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId));
-                yield row.map(r -> Map.of(
+                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId != null ? companyId : ""));
+                yield row.map(r -> Map.<String, Object>of(
                         "active_campaigns", r.getLong("active_campaigns"),
                         "active_campaigns_budget", r.getDecimal("active_campaigns_budget")
-                )).orElse(Map.of("active_campaigns", 0, "active_campaigns_budget", 0));
+                )).orElse(Map.<String, Object>of("active_campaigns", 0L, "active_campaigns_budget", BigDecimal.ZERO));
             }
             case "mkt-kpi-telecalling" -> {
-                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId));
-                yield row.map(r -> Map.of(
+                Optional<Row> row = dataClient.queryOne("widget.kpi_summary", Map.of("company_id", companyId != null ? companyId : ""));
+                yield row.map(r -> Map.<String, Object>of(
                         "calls_today", r.getLong("calls_today"),
                         "pending_queue_items", r.getLong("pending_queue_items")
-                )).orElse(Map.of("calls_today", 0, "pending_queue_items", 0));
+                )).orElse(Map.<String, Object>of("calls_today", 0L, "pending_queue_items", 0L));
             }
             case "mkt-lead-funnel" -> reportService.getLeadSummary(companyId, null, null);
             case "mkt-campaign-roi" -> reportService.getCampaignPerformance(companyId, null);
@@ -122,6 +123,15 @@ public class MarketWidgetDataController {
             }
             default -> Map.of();
         };
+    }
+
+    private static UUID parseCompanyId(String companyId) {
+        if (companyId == null || companyId.isBlank()) return null;
+        try {
+            return UUID.fromString(companyId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static SessionAuthentication requireSession(Authentication authentication) {

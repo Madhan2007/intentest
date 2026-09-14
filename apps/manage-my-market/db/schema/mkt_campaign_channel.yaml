@@ -21,11 +21,11 @@ columns:
     max_length: 24
     comment: EMAIL | SMS | SOCIAL | SEARCH_ADS | DISPLAY_ADS | CUSTOM.
   - name: budget
-    type: numeric
+    type: decimal
     nullable: false
     default: "0"
   - name: spend
-    type: numeric
+    type: decimal
     nullable: false
     default: "0"
   - name: created_at

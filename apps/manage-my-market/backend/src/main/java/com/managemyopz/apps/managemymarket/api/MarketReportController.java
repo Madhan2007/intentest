@@ -44,7 +44,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getLeadSummary(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.fromDate() : null,
             filter != null ? filter.toDate() : null
         );
@@ -62,7 +62,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getLeadConversionRate(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.fromDate() : null,
             filter != null ? filter.toDate() : null
         );
@@ -80,7 +80,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getCampaignPerformance(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.status() : null
         );
         return ResponseEntity.ok(ApiEnvelope.ok(list, correlationId(request)));
@@ -97,7 +97,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getChannelSpend(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.fromDate() : null,
             filter != null ? filter.toDate() : null
         );
@@ -105,7 +105,7 @@ public class MarketReportController {
     }
 
     @PostMapping("/telecalling-stats")
-    @RequiresPermission(module = ManageMyMarketConstants.MODULE_ID, feature = ManageMyMarketConstants.FEATURE_CALLS, action = "v")
+    @RequiresPermission(module = ManageMyMarketConstants.MODULE_ID, feature = ManageMyMarketConstants.FEATURE_CALL_QUEUE, action = "v")
     public ResponseEntity<ApiEnvelope<List<Map<String, Object>>>> getTelecallingStats(
         @RequestBody(required = false) ReportFilterRequest filter,
         Authentication authentication,
@@ -115,7 +115,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getTelecallingStats(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.agentUserId() : null,
             filter != null ? filter.fromDate() : null,
             filter != null ? filter.toDate() : null
@@ -124,7 +124,7 @@ public class MarketReportController {
     }
 
     @PostMapping("/referrer-leaderboard")
-    @RequiresPermission(module = ManageMyMarketConstants.MODULE_ID, feature = ManageMyMarketConstants.FEATURE_REFERRER, action = "v")
+    @RequiresPermission(module = ManageMyMarketConstants.MODULE_ID, feature = ManageMyMarketConstants.FEATURE_REFERRAL, action = "v")
     public ResponseEntity<ApiEnvelope<List<Map<String, Object>>>> getReferrerLeaderboard(
         @RequestBody(required = false) ReportFilterRequest filter,
         Authentication authentication,
@@ -135,7 +135,7 @@ public class MarketReportController {
 
         int limit = filter != null && filter.limit() != null ? filter.limit() : 20;
         var list = reportService.getReferrerLeaderboard(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.status() : null,
             limit
         );
@@ -153,7 +153,7 @@ public class MarketReportController {
         if (session == null) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
         var list = reportService.getFollowupCompliance(
-            session.getCompanyId(),
+            parseCompanyId(session.getCompanyId()),
             filter != null ? filter.fromDate() : null,
             filter != null ? filter.toDate() : null
         );
@@ -177,8 +177,17 @@ public class MarketReportController {
             } catch (IllegalArgumentException ignored) {}
         }
 
-        var list = reportService.getJourneyFunnel(session.getCompanyId(), journeyId);
+        var list = reportService.getJourneyFunnel(parseCompanyId(session.getCompanyId()), journeyId);
         return ResponseEntity.ok(ApiEnvelope.ok(list, correlationId(request)));
+    }
+
+    private static UUID parseCompanyId(String companyId) {
+        if (companyId == null || companyId.isBlank()) return null;
+        try {
+            return UUID.fromString(companyId);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private static SessionAuthentication requireSession(Authentication authentication) {

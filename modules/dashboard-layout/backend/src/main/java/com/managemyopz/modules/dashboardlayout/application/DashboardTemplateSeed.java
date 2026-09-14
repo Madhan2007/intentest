@@ -128,12 +128,11 @@ public class DashboardTemplateSeed {
                                     if (wItem instanceof Map<?, ?> wm) {
                                         String wKey = String.valueOf(wm.get("widget_key"));
                                         String zKey = wm.get("zone_key") != null ? String.valueOf(wm.get("zone_key")) : "main_grid";
-                                        Map<String, Object> pos = Map.of(
-                                                "x", wm.getOrDefault("x", 0),
-                                                "y", wm.getOrDefault("y", 0),
-                                                "w", wm.getOrDefault("w", 4),
-                                                "h", wm.getOrDefault("h", 2)
-                                        );
+                                        Map<String, Object> pos = new LinkedHashMap<>();
+                                        pos.put("x", wm.get("x") != null ? wm.get("x") : 0);
+                                        pos.put("y", wm.get("y") != null ? wm.get("y") : 0);
+                                        pos.put("w", wm.get("w") != null ? wm.get("w") : 4);
+                                        pos.put("h", wm.get("h") != null ? wm.get("h") : 2);
                                         dtwList.add(new DashboardTemplateWidget(
                                                 UUID.randomUUID(),
                                                 tKey,
