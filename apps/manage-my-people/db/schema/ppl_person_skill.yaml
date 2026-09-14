@@ -1,0 +1,43 @@
+# ppl_person_skill — person <-> skill catalog link with proficiency.
+entity: ppl_person_skill
+table: ppl_person_skill
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: skill_id
+    type: uuid
+    nullable: false
+  - name: proficiency_level
+    type: text
+    nullable: true
+    max_length: 16
+    comment: BEGINNER | INTERMEDIATE | ADVANCED | EXPERT.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_skill_person_skill
+    columns: [person_id, skill_id]
+    unique: true
+  - name: idx_ppl_person_skill_skill
+    columns: [skill_id]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: skill_id
+    references_table: ppl_skill_catalog
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

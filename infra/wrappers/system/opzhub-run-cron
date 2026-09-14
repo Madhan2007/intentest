@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Installed once to /usr/local/bin/opzhub-run-cron (root). Follows current release.
+# SPDX-License-Identifier: Apache-2.0
+set -euo pipefail
+if [ -f /etc/opzhub/opzhub.env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . /etc/opzhub/opzhub.env
+  set +a
+fi
+APP="${OPZHUB_HOME:-/home/tsuser/opzhub}"
+exec bash "${APP}/infra/wrappers/run-cron.sh" "$@"

@@ -1,0 +1,47 @@
+# ppl_company_setting — one row per company, controlling how this app's
+# people data relates to login accounts (id_user, OPZUSER). Two separate
+# decisions live here on purpose:
+#   1. Whether a person CAN be linked to a login account at all — that is
+#      always allowed; ppl_person.linked_user_id is simply nullable.
+#   2. Whether, once linked, name/email are PULLED FROM that login account
+#      (some companies reuse the same name/email as identity — no double
+#      entry) or stay fully INDEPENDENT (some companies keep HR-style
+#      people data authoritative on its own, even for linked accounts).
+# identity_sync_mode answers only question 2.
+entity: ppl_company_setting
+table: ppl_company_setting
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: company_id
+    type: uuid
+    primary_key: true
+    nullable: false
+  - name: identity_sync_mode
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'INDEPENDENT'"
+    comment: >
+      LINKED — for a person with linked_user_id set, first_name/last_name/
+      display_name/work_email are copied from id_user on link and kept in
+      sync by an explicit "Sync from login" subaction (never a silent
+      background overwrite); those fields render role_visibility:
+      readonly on the person profile while linked.
+      INDEPENDENT (default) — person fields are always editable and never
+      auto-populated from id_user, even when linked_user_id is set.
+      Allowed values governed by id_field_definition, not a DB CHECK.
+  - name: updated_by
+    type: uuid
+    nullable: true
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. App-enforced at write time (doc 28 §3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

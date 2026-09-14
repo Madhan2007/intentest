@@ -1,0 +1,71 @@
+# dsk_client_account — the external client company this tenant provides
+# service to. Distinct from this platform's own company_information (the
+# tenant running ManageMyOpz itself) — a dsk_client_account is that
+# tenant's OWN customer, receiving support tickets. Matches the
+# reference app's TENANT_CLIENT_MASTER, which already correctly scopes
+# credit terms per client (credit approval + limit gate the ticket
+# commercial-clearance workflow — see dsk_ticket.yaml).
+entity: dsk_client_account
+table: dsk_client_account
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: client_code
+    type: text
+    nullable: false
+    max_length: 32
+  - name: client_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: contact_email
+    type: text
+    nullable: false
+    max_length: 200
+  - name: contact_phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: address
+    type: text
+    nullable: true
+  - name: is_credit_approved
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: credit_limit
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_client_account_company_code
+    columns: [company_id, client_code]
+    unique: true
+  - name: idx_dsk_client_account_company_active
+    columns: [company_id, is_active]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

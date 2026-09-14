@@ -1,0 +1,81 @@
+# ppl_attendance_record — one day's attendance status for a person.
+# Deliberately category-agnostic: an employee and a student are both
+# "present, absent, late, or on leave" on a given date. This table was
+# originally drafted for a separate apps/manage-my-hr wrapper app, then
+# folded in here because attendance is not an employee-only concept —
+# see design/docs/architecture/27-people-domain-design.md S8 for the
+# reasoning. Workplace-only elaborations (check-in/check-out timestamps
+# with geofenced coordinates, working-minutes/late-minutes computation,
+# payroll rollups, biometric capture) are deliberately NOT here — those
+# are genuinely employee-specific and stay deferred to a future,
+# evidenced design rather than forced into this generic core.
+entity: ppl_attendance_record
+table: ppl_attendance_record
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: attendance_date
+    type: date
+    nullable: false
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PRESENT'"
+    comment: >
+      Allowed values governed by id_field_definition. PRESENT | ABSENT |
+      LATE | HALF_DAY | ON_LEAVE | EXCUSED.
+  - name: marked_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER). Null when self-marked by the person via their own linked login.
+  - name: notes
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_attendance_record_person_date
+    columns: [person_id, attendance_date]
+    unique: true
+  - name: idx_ppl_attendance_record_company_date
+    columns: [company_id, attendance_date]
+  - name: idx_ppl_attendance_record_company_status
+    columns: [company_id, status]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  # Same-database: ppl_person lives on OPZPEOPLE too, so this is a real,
+  # Postgres-enforced FK — unlike the cross-database references this
+  # table would have needed as a separate app.
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  # Cross-database: id_user lives on OPZUSER (always present — identity is
+  # a shared module). App-enforced (doc 28 S3).
+  - column: marked_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

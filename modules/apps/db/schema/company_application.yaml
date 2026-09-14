@@ -1,0 +1,48 @@
+# Company entitlement and install state for catalog applications (OPZHUB).
+# company_id references company_information.id on OPZMAIN (app-enforced FK).
+entity: company_application
+table: company_application
+version: 1
+database: OPZHUB
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: application_id
+    type: uuid
+    nullable: false
+  - name: license_state
+    type: text
+    nullable: false
+    max_length: 32
+    default: "'unlicensed'"
+  - name: favourite
+    type: boolean
+    nullable: false
+    default: 'false'
+indexes:
+  - name: idx_company_application_company_app
+    columns: [company_id, application_id]
+    unique: true
+  - name: idx_company_application_company_state
+    columns: [company_id, license_state]
+  - name: idx_company_application_company_favourite
+    columns: [company_id, favourite]
+foreign_keys:
+  - column: application_id
+    references_table: application_catalog
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  # Cross-database: company_information lives on OPZMAIN. Postgres cannot
+  # create that constraint; the kernel enforces it at write time (APP).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

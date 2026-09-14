@@ -1,0 +1,54 @@
+# ppl_person_certification — professional certifications/credentials.
+entity: ppl_person_certification
+table: ppl_person_certification
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: certification_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: issuing_authority
+    type: text
+    nullable: true
+    max_length: 200
+  - name: credential_id
+    type: text
+    nullable: true
+    max_length: 100
+  - name: issued_on
+    type: date
+    nullable: true
+  - name: expires_on
+    type: date
+    nullable: true
+  - name: credential_url
+    type: text
+    nullable: true
+  - name: is_verified
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_certification_person
+    columns: [person_id]
+  - name: idx_ppl_person_certification_expires
+    columns: [expires_on]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

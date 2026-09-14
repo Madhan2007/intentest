@@ -1,0 +1,28 @@
+id: maintenance
+version: 0.1.0
+title: Maintenance mode & system health (OPZMAIN)
+runtimes:
+  frontend: true
+  mobile: false
+  backend: true
+  python: false
+  scripts: false
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /admin/maintenance
+  api_prefixes:
+    - /api/v1/opzhub/maintenance
+  workers: []
+  events: []
+  menus:
+    - id: maintenance.windows
+      parent: null
+      title: Maintenance
+migrations:
+  backend: true
+  python: false
+access:
+  features:
+    - { id: mnt, title: Maintenance Windows }

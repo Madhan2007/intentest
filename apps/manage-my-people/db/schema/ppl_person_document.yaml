@@ -1,0 +1,63 @@
+# ppl_person_document — person document store. Merges the reference app's
+# separate EmployeeDocument + Document + DocumentVersion entities into one
+# versioned table (version_no) instead of a parent/child version graph.
+entity: ppl_person_document
+table: ppl_person_document
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: document_category
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Allowed values governed by id_field_definition (per-company document categories).
+  - name: document_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: file_url
+    type: text
+    nullable: false
+  - name: file_size_bytes
+    type: bigint
+    nullable: true
+  - name: mime_type
+    type: text
+    nullable: true
+    max_length: 100
+  - name: version_no
+    type: integer
+    nullable: false
+    default: "1"
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: ACTIVE | ARCHIVED.
+  - name: uploaded_by
+    type: uuid
+    nullable: true
+  - name: uploaded_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_document_person_category
+    columns: [person_id, document_category]
+  - name: idx_ppl_person_document_person_status
+    columns: [person_id, status]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

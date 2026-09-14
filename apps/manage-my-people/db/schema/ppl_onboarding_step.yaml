@@ -1,0 +1,45 @@
+# ppl_onboarding_step — generic checklist step (employee onboarding,
+# student admission checklist, HRA enrollment step, ...). step_code is a
+# per-company catalog key, not an enum, so the checklist itself is data.
+entity: ppl_onboarding_step
+table: ppl_onboarding_step
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: step_code
+    type: text
+    nullable: false
+    max_length: 48
+  - name: step_status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | IN_PROGRESS | COMPLETED | SKIPPED.
+  - name: completed_at
+    type: timestamptz
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_onboarding_step_person_code
+    columns: [person_id, step_code]
+    unique: true
+  - name: idx_ppl_onboarding_step_person_status
+    columns: [person_id, step_status]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

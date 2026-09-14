@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://managemyopz.example/schemas/field-def.json",
+  "title": "FieldDef",
+  "description": "Kernel field definition shared by web (React) and mobile (Flutter). Modules bind to `type` keys; they never invent a one-off control. See design/docs/architecture/03-frontend-design.md and 22-common-fields-forms-fk.md.",
+  "type": "object",
+  "required": ["name", "type", "label"],
+  "properties": {
+    "name": { "type": "string", "description": "Field key, unique within the form" },
+    "type": {
+      "type": "string",
+      "description": "FieldType key resolved by common/frontend/src/fields/registry.ts and common/mobile/lib/fields",
+      "enum": [
+        "text", "password", "email", "url", "phone", "search", "textarea",
+        "number", "integer", "decimal", "currency", "quantity", "percent", "ratio", "formula",
+        "date", "datetime", "time", "date-range", "fiscal-period", "duration",
+        "select", "multi-select", "radio", "checkbox", "checkbox-group", "switch", "toggle-group", "rating",
+        "lookup", "lookup-multi", "tree-select", "tag",
+        "address", "geo-point", "json", "key-value", "money-split",
+        "file", "image", "image-drop", "attachment-list",
+        "rich-text", "markdown", "code",
+        "color", "icon", "masked",
+        "hidden", "computed"
+      ]
+    },
+    "label": { "type": "string" },
+    "hint": { "type": "string" },
+    "required": { "type": "boolean", "default": false },
+    "mode": { "type": "string", "enum": ["edit", "view", "hide"], "default": "edit" },
+    "rules": {
+      "type": "object",
+      "description": "Server-authoritative validation; client re-applies but backend is source of truth",
+      "additionalProperties": true
+    },
+    "fk": {
+      "type": "object",
+      "description": "Foreign-key / lookup binding metadata (doc 22 §6)",
+      "properties": {
+        "res": { "type": "string", "description": "Lookup resource token routed via /api/v1/opzhub/lookup/{res}" },
+        "multi": { "type": "boolean", "default": false }
+      }
+    },
+    "io": {
+      "type": "object",
+      "description": "Import/export/bulk flags — reuses RBAC letters v/c/u/d (doc 18 §3.1, doc 22 §8)",
+      "properties": {
+        "export": { "type": "boolean", "default": true },
+        "import": { "type": "boolean", "default": true }
+      }
+    },
+    "options": {
+      "type": "array",
+      "description": "Static choice options for select/radio/checkbox-group types",
+      "items": {
+        "type": "object",
+        "required": ["value", "label"],
+        "properties": {
+          "value": {},
+          "label": { "type": "string" }
+        }
+      }
+    }
+  }
+}

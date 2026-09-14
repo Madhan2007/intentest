@@ -1,0 +1,57 @@
+# ppl_person_custom_field — EAV value store for per-company custom fields
+# (e.g. an HRA company adds "policy_number", a students wrapper adds
+# "roll_number") without a migration. This table stores VALUES only.
+# Field DEFINITIONS (label, type, mandatory, allowed values) are not
+# duplicated here — they live in id_field_definition under
+# form_id = "manage-my-people.person.custom" (doc 26 §2), so custom-field
+# admin reuses the same metadata mechanism as every other screen instead of
+# inventing a second one.
+entity: ppl_person_custom_field
+table: ppl_person_custom_field
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: field_key
+    type: text
+    nullable: false
+    max_length: 64
+    comment: Matches id_field_definition.field_key for form_id "manage-my-people.person.custom".
+  - name: field_value
+    type: text
+    nullable: true
+  - name: field_group
+    type: text
+    nullable: true
+    max_length: 64
+  - name: display_order
+    type: integer
+    nullable: false
+    default: "0"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_custom_field_person_key
+    columns: [person_id, field_key]
+    unique: true
+  - name: idx_ppl_person_custom_field_person_group
+    columns: [person_id, field_group]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

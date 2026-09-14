@@ -1,0 +1,10 @@
+# Keep Docker build contexts small and avoid NTFS junctions (dev-only local
+# aliases for @modules / lib/modules resolution — doc 02 §11).
+modules/node_modules
+common/frontend/node_modules
+common/mobile/build
+common/mobile/.dart_tool
+common/backend/target
+**/__pycache__
+**/*.pyc
+.git

@@ -1,0 +1,68 @@
+# mkt_referrer — a referral partner. leads_count / rewards_paid_total /
+# rewards_pending_total are maintained aggregates (recomputed by the
+# referral service on lead/reward writes, same pattern as
+# dat_business.rating_average in apps/manage-my-data) — never the source
+# of truth, which is mkt_lead (source_type=REFERRAL) and
+# mkt_referral_reward rows.
+entity: mkt_referrer
+table: mkt_referrer
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: referrer_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: ACTIVE | INACTIVE.
+  - name: leads_count
+    type: integer
+    nullable: false
+    default: "0"
+  - name: rewards_paid_total
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: rewards_pending_total
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: joined_at
+    type: date
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_referrer_company_status
+    columns: [company_id, status]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

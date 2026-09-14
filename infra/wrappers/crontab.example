@@ -1,0 +1,14 @@
+# ManageMyOpz — crontab for user tsuser (install once; survives app upgrades)
+# crontab -u tsuser crontab.example
+# Calls /usr/local/bin stubs (root-installed), which exec the current release.
+
+SHELL=/bin/bash
+HOME=/home/tsuser
+PATH=/usr/local/bin:/usr/bin:/bin
+
+*/5 * * * * /usr/local/bin/opzhub-run-cron health
+* * * * * /usr/local/bin/opzhub-run-cron reap-stale
+17 * * * * /usr/local/bin/opzhub-run-cron log-trim
+*/15 * * * * /usr/local/bin/opzhub-run-cron doctor-lite
+0 * * * * /usr/local/bin/opzhub-run-cron db-backup
+17 */6 * * * /usr/local/bin/opzhub-run-cron license-beat

@@ -1,0 +1,89 @@
+# ppl_leave_request — a leave/absence application. Multi-level approval
+# state lives in ppl_leave_approval rows (sequence_no per level), not
+# baked into fixed status values — same minimal, app-owned approval-table
+# pattern used for dsk_ticket_approval (apps/manage-my-desk) and
+# fin_write_off (apps/manage-my-finance), with the same forward-looking
+# caveat: migrate to a shared modules/workflow if one is ever built
+# (S4 point 3 of this app's own design doc).
+entity: ppl_leave_request
+table: ppl_leave_request
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: leave_type_id
+    type: uuid
+    nullable: false
+  - name: start_date
+    type: date
+    nullable: false
+  - name: end_date
+    type: date
+    nullable: false
+  - name: is_half_day
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: half_day_session
+    type: text
+    nullable: true
+    max_length: 12
+    comment: FIRST_HALF | SECOND_HALF. Only set when is_half_day is true.
+  - name: days_count
+    type: numeric
+    nullable: false
+  - name: reason
+    type: text
+    nullable: true
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'DRAFT'"
+    comment: DRAFT | PENDING | APPROVED | REJECTED | CANCELLED.
+  - name: submitted_at
+    type: timestamptz
+    nullable: true
+  - name: decided_at
+    type: timestamptz
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_leave_request_company_status
+    columns: [company_id, status]
+  - name: idx_ppl_leave_request_person
+    columns: [person_id, start_date]
+  - name: idx_ppl_leave_request_leave_type
+    columns: [leave_type_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: leave_type_id
+    references_table: ppl_leave_type
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

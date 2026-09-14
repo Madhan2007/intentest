@@ -1,0 +1,24 @@
+# SPA static server behind the public gateway (doc 09 §2, run-web.sh). Plaintext
+# on the isolated internal network — the browser only ever talks to Nginx (8102).
+worker_processes auto;
+events {
+  worker_connections 1024;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+  access_log /dev/stdout;
+  error_log /dev/stderr info;
+  server_tokens off;
+
+  server {
+    listen 8109;
+    root /home/tsuser/opzhub/web/dist;
+    index index.html;
+
+    location / {
+      try_files $uri /index.html;
+    }
+  }
+}

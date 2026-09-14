@@ -1,0 +1,69 @@
+# ppl_org_unit — generic, self-referencing organizational hierarchy.
+# Replaces the reference app's six separate tables (Organization,
+# BusinessUnit, Division, Department, Team, Location, CostCenter) with one
+# table keyed by `unit_type`. This is an explicit optimization: fewer
+# tables, one index family, one admin screen family, and wrapper apps
+# (manage-my-students: institution > campus > class) reuse it by adding
+# new unit_type values instead of new tables.
+entity: ppl_org_unit
+table: ppl_org_unit
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: unit_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: >
+      Allowed values governed by id_field_definition
+      (form_id "manage-my-people.org-unit.create"). Starting set:
+      ORGANIZATION | BUSINESS_UNIT | DIVISION | DEPARTMENT |
+      SUB_DEPARTMENT | TEAM | LOCATION | COST_CENTER | CUSTOM.
+  - name: parent_unit_id
+    type: uuid
+    nullable: true
+    comment: Self-referencing. Null for a top-level unit (e.g. the organization root).
+  - name: unit_code
+    type: text
+    nullable: false
+    max_length: 32
+  - name: unit_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_org_unit_company_type_code
+    columns: [company_id, unit_type, unit_code]
+    unique: true
+  - name: idx_ppl_org_unit_parent
+    columns: [company_id, parent_unit_id]
+  - name: idx_ppl_org_unit_company_type
+    columns: [company_id, unit_type]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. App-enforced at write time (doc 28 §3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: parent_unit_id
+    references_table: ppl_org_unit
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

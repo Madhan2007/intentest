@@ -1,0 +1,76 @@
+# fin_customer_payment_method — a stored payment method reference. The
+# reference app has TWO tables for this concept: `CustomerPaymentMethod`
+# (fully fielded: type/status/is_primary/is_backup/details) and a
+# separate, empty-stub `PaymentSource` with no fields at all — another
+# instance of the reference-app duplication pattern already seen in
+# apps/manage-my-market (four lead shapes) and apps/manage-my-data (User
+# vs StaffUser). This design keeps one table.
+# details_json must NEVER contain a raw card/bank number or CVV — only an
+# opaque gateway token/reference and display-safe metadata (e.g. last 4
+# digits, expiry month/year, card brand). Enforced by DTO validation and
+# by never exposing this column through the generic CRUD API.
+entity: fin_customer_payment_method
+table: fin_customer_payment_method
+version: 1
+database: OPZFINANCE
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: customer_id
+    type: uuid
+    nullable: false
+  - name: method_type
+    type: text
+    nullable: false
+    max_length: 16
+    comment: CARD | BANK_ACCOUNT | WALLET | OTHER.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'VALID'"
+    comment: VALID | EXPIRED | FAILED.
+  - name: is_primary
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: is_backup
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: gateway_token
+    type: text
+    nullable: true
+    comment: Opaque payment-gateway token. Never a raw card/bank number.
+  - name: display_label
+    type: text
+    nullable: true
+    max_length: 100
+    comment: Display-safe summary, e.g. "Visa ****4242 exp 08/28".
+  - name: details_json
+    type: jsonb
+    nullable: true
+    comment: Display-safe metadata only (brand, last 4 digits, expiry) — never PAN/CVV/full account number.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_customer_payment_method_customer
+    columns: [customer_id]
+  - name: idx_fin_customer_payment_method_customer_primary
+    columns: [customer_id, is_primary]
+foreign_keys:
+  - column: customer_id
+    references_table: fin_customer
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

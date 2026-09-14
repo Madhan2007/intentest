@@ -1,0 +1,51 @@
+# ppl_leave_approval — one approval level/decision on a leave request.
+entity: ppl_leave_approval
+table: ppl_leave_approval
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: leave_request_id
+    type: uuid
+    nullable: false
+  - name: sequence_no
+    type: integer
+    nullable: false
+    default: "1"
+  - name: approver_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | APPROVED | REJECTED.
+  - name: comments
+    type: text
+    nullable: true
+  - name: decided_at
+    type: timestamptz
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_leave_approval_request_status
+    columns: [leave_request_id, status]
+foreign_keys:
+  - column: leave_request_id
+    references_table: ppl_leave_request
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: approver_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

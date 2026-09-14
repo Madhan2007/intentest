@@ -1,0 +1,47 @@
+# fin_payment_allocation — which invoice(s) a payment transaction was
+# applied to, and how much. Replaces the reference app's
+# `PaymentReconciliation` entity, which (like the six other empty-stub
+# entities in this app) declares no fields at all — rather than guessing
+# at a vague "reconciliation" shape, this is the standard, well-known
+# billing pattern: a many-to-many link between payments and invoices with
+# an allocated amount, since one payment can cover multiple invoices and
+# one invoice can be paid across multiple payments (partial payment).
+entity: fin_payment_allocation
+table: fin_payment_allocation
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: payment_transaction_id
+    type: uuid
+    nullable: false
+  - name: invoice_id
+    type: uuid
+    nullable: false
+  - name: allocated_amount
+    type: numeric
+    nullable: false
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_payment_allocation_payment
+    columns: [payment_transaction_id]
+  - name: idx_fin_payment_allocation_invoice
+    columns: [invoice_id]
+foreign_keys:
+  - column: payment_transaction_id
+    references_table: fin_payment_transaction
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: invoice_id
+    references_table: fin_invoice
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

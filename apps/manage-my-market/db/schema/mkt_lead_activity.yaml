@@ -1,0 +1,74 @@
+# mkt_lead_activity — lead timeline: notes, status/assignment changes, and
+# links back to the call or follow-up that generated the entry. Same
+# consolidated-timeline pattern as dsk_ticket_activity
+# (apps/manage-my-desk) and dat_business_workflow_log
+# (apps/manage-my-data).
+entity: mkt_lead_activity
+table: mkt_lead_activity
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: activity_type
+    type: text
+    nullable: false
+    max_length: 24
+    default: "'NOTE'"
+    comment: NOTE | STATUS_CHANGE | ASSIGNMENT_CHANGE | CALL | FOLLOWUP | EMAIL.
+  - name: title
+    type: text
+    nullable: false
+    max_length: 200
+  - name: description
+    type: text
+    nullable: true
+  - name: old_value
+    type: text
+    nullable: true
+  - name: new_value
+    type: text
+    nullable: true
+  - name: related_call_log_id
+    type: uuid
+    nullable: true
+  - name: related_followup_id
+    type: uuid
+    nullable: true
+  - name: performed_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_lead_activity_lead_created
+    columns: [lead_id, created_at]
+foreign_keys:
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: related_call_log_id
+    references_table: mkt_call_log
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: related_followup_id
+    references_table: mkt_lead_followup
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: performed_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

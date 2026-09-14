@@ -1,0 +1,71 @@
+# fin_collections_queue_item — overdue-invoice follow-up tracking.
+# Replaces the reference app's empty-stub `ARCollectionsQueue`. Same
+# working-queue shape as apps/manage-my-desk's dsk_group /
+# apps/manage-my-market's mkt_call_queue, applied to receivables
+# collections.
+entity: fin_collections_queue_item
+table: fin_collections_queue_item
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: invoice_id
+    type: uuid
+    nullable: false
+  - name: assigned_agent_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | CONTACTED | PROMISED | ESCALATED | RESOLVED.
+  - name: priority
+    type: text
+    nullable: true
+    max_length: 8
+    comment: LOW | MEDIUM | HIGH.
+  - name: next_action_at
+    type: timestamptz
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_collections_queue_item_company_status
+    columns: [company_id, status]
+  - name: idx_fin_collections_queue_item_invoice
+    columns: [invoice_id]
+  - name: idx_fin_collections_queue_item_agent
+    columns: [assigned_agent_user_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: invoice_id
+    references_table: fin_invoice
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: assigned_agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

@@ -1,0 +1,30 @@
+/**
+ * Organization: Technosprint info Solutions
+ * Owner: Logaraj S
+ * Created at: 2026-09-10
+ * Description: Shared visual tokens for branded operation screens.
+ */
+
+:root {
+  --mmo-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --mmo-color-navy: #051a2f;
+  --mmo-color-white: #ffffff;
+  --mmo-color-primary: #0080ff;
+  --mmo-color-primary-hover: #0072e6;
+  --mmo-color-text-heading: #111827;
+  --mmo-color-text-body: #1f2937;
+  --mmo-color-text-muted: #4b5563;
+  --mmo-color-text-subtle: #9ca3af;
+  --mmo-color-tagline: #cbd5e1;
+  --mmo-color-border: #e5e7eb;
+  --mmo-color-input-bg: #f3f4f6;
+  --mmo-color-focus: #3b82f6;
+  --mmo-color-danger: #ef4444;
+  --mmo-color-checkbox-border: #d1d5db;
+  --mmo-radius-card: 28px;
+  --mmo-radius-card-compact: 20px;
+  --mmo-radius-input: 8px;
+  --mmo-radius-button: 24px;
+  --mmo-input-height: 48px;
+}

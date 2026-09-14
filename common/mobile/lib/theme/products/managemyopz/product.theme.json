@@ -1,0 +1,8 @@
+{
+  "product_key": "managemyopz",
+  "product_name": "ManageMyOpz",
+  "logo_uri": "/branding/products/managemyopz/logo.svg",
+  "icon_key": "managemyopz",
+  "primary_color": "#2563eb",
+  "_comment": "Placeholder. Replace primary_color and logo_uri with real branding before shipping. See ../PLACEHOLDER.md for the branding resolution order (product default -> company override)."
+}

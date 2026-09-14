@@ -1,0 +1,75 @@
+# mkt_call_queue_item — one lead's position/state within a dialer queue.
+entity: mkt_call_queue_item
+table: mkt_call_queue_item
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: queue_id
+    type: uuid
+    nullable: false
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: priority
+    type: text
+    nullable: true
+    max_length: 8
+    comment: HOT | WARM | COLD.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | IN_PROGRESS | COMPLETED | SKIPPED.
+  - name: assigned_agent_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: call_attempts
+    type: integer
+    nullable: false
+    default: "0"
+  - name: last_dialed_at
+    type: timestamptz
+    nullable: true
+  - name: next_call_scheduled_at
+    type: timestamptz
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_call_queue_item_queue_status
+    columns: [queue_id, status]
+  - name: idx_mkt_call_queue_item_lead
+    columns: [lead_id]
+  - name: idx_mkt_call_queue_item_agent
+    columns: [assigned_agent_user_id]
+foreign_keys:
+  - column: queue_id
+    references_table: mkt_call_queue
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: assigned_agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

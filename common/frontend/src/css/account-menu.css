@@ -1,0 +1,79 @@
+/**
+ * Organization: Technosprint info Solutions
+ * Owner: Logaraj S
+ * Created at: 2026-09-10
+ * Description: Signed-in account trigger and dropdown, reused by dashboard and shell.
+ */
+
+.mmo-account {
+  position: relative;
+}
+
+.mmo-account-trigger {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #eef2f6;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 4px 14px 4px 5px;
+  height: 42px;
+  cursor: pointer;
+  color: #94a3b8;
+  font-family: inherit;
+}
+
+.mmo-account-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #8b5cf6;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.mmo-account-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mmo-account-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  padding: 6px;
+  z-index: 20;
+}
+
+.mmo-account-menu-item {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #0f172a;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.mmo-account-menu-item:hover {
+  background: #f8fafc;
+}

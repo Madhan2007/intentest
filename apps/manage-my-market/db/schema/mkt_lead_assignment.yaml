@@ -1,0 +1,50 @@
+# mkt_lead_assignment — lead ownership assignment history. Consolidates
+# the reference app's two near-identical tables, `LeadAssignment`
+# (leadId/assignedBy/assignedTo/assignedAt) and `LeadHistory`
+# (leadId/assignedBy/assignedTo/assignedAt/transferReason) — the same
+# event recorded twice under two names — into one table.
+entity: mkt_lead_assignment
+table: mkt_lead_assignment
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: assigned_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: assigned_to_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: transfer_reason
+    type: text
+    nullable: true
+  - name: assigned_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_lead_assignment_lead_assigned
+    columns: [lead_id, assigned_at]
+foreign_keys:
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: assigned_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: assigned_to_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

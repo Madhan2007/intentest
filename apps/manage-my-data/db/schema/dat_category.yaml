@@ -1,0 +1,53 @@
+# dat_category — company-managed business category catalog, hierarchical
+# (self-referencing), same generalization technique used for
+# ppl_org_unit (apps/manage-my-people) and dsk_category
+# (apps/manage-my-desk). The reference app hardcodes a 28-entry category
+# array in the frontend; here it is data.
+entity: dat_category
+table: dat_category
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: parent_category_id
+    type: uuid
+    nullable: true
+  - name: category_code
+    type: text
+    nullable: false
+    max_length: 48
+  - name: category_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_category_company_code
+    columns: [company_id, category_code]
+    unique: true
+  - name: idx_dat_category_company_parent
+    columns: [company_id, parent_category_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: parent_category_id
+    references_table: dat_category
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

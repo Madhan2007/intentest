@@ -1,0 +1,29 @@
+id: backup-restore
+version: 0.1.0
+title: Database backup & restore (OPZMAIN job tracking)
+runtimes:
+  frontend: true
+  mobile: false
+  backend: true
+  python: false
+  scripts: true
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /admin/backup-restore
+  api_prefixes:
+    - /api/v1/opzhub/backup-restore
+  workers: []
+  events: []
+  menus:
+    - id: backup-restore.jobs
+      parent: null
+      title: Backup & Restore
+migrations:
+  backend: true
+  python: false
+access:
+  features:
+    - { id: bkp, title: Backup Jobs }
+    - { id: rst, title: Restore }

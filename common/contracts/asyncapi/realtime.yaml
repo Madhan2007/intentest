@@ -1,0 +1,42 @@
+asyncapi: 3.0.0
+info:
+  title: ManageMyOpz Realtime
+  version: "2026.1"
+  description: >
+    WebSocket envelopes over /ws/opzhub, and the Valkey Pub/Sub topics
+    that back them (doc 04 §7, doc 09 §4.1).
+channels:
+  ws.opzhub:
+    address: /ws/opzhub
+    messages:
+      envelope:
+        $ref: "#/components/messages/Envelope"
+  notify.user:
+    address: "notify.user.{userId}"
+    parameters:
+      userId: { description: Kernel user id }
+    messages:
+      envelope:
+        $ref: "#/components/messages/Envelope"
+  job.progress:
+    address: "ocr.job.{jobId}"
+    parameters:
+      jobId: { description: Broker job id }
+    messages:
+      envelope:
+        $ref: "#/components/messages/Envelope"
+operations:
+  receiveNotification:
+    action: receive
+    channel: { $ref: "#/channels/notify.user" }
+components:
+  messages:
+    Envelope:
+      payload:
+        type: object
+        required: [type, topic, ts]
+        properties:
+          type: { type: string, description: "e.g. notify | job.progress | heartbeat" }
+          topic: { type: string }
+          ts: { type: string, format: date-time }
+          payload: { type: object }

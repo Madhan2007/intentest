@@ -1,0 +1,8 @@
+{
+  "product_key": "managemyid",
+  "product_name": "ManageMyID",
+  "logo_uri": "/branding/products/managemyid/logo.svg",
+  "icon_key": "managemyid",
+  "primary_color": "#64748b",
+  "_comment": "Placeholder for a planned product. No apps/ folders exist for this product yet (see platform/catalog/products.yaml). Replace when apps are built."
+}

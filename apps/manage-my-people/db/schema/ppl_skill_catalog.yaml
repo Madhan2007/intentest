@@ -1,0 +1,39 @@
+# ppl_skill_catalog — per-company catalog of known skills, so
+# ppl_person_skill can FK to a real row instead of storing free text
+# (no duplicate spellings, sortable, reusable for lookup fields).
+entity: ppl_skill_catalog
+table: ppl_skill_catalog
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: skill_name
+    type: text
+    nullable: false
+    max_length: 150
+  - name: skill_category
+    type: text
+    nullable: true
+    max_length: 100
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+indexes:
+  - name: idx_ppl_skill_catalog_company_name
+    columns: [company_id, skill_name]
+    unique: true
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. App-enforced at write time (doc 28 §3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

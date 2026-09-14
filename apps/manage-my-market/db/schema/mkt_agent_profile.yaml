@@ -1,0 +1,67 @@
+# mkt_agent_profile — app-specific extension for a marketing/telemarketing
+# agent. The reference app's `User` entity mixes login credentials
+# (email/password/role/status) with a full HR profile
+# (department/designation/branch/manager/joiningDate/experience/skills)
+# in one flat table — a duplicate identity system AND a duplicate HR
+# profile at once. This design keeps only what is genuinely specific to
+# this app (marketing_type) and, for the HR-profile fields, links
+# optionally to apps/manage-my-people's ppl_person (department,
+# designation, manager, joining date all already live there) instead of
+# duplicating them — the same optional cross-app pattern as
+# dsk_group.owning_org_unit_id (apps/manage-my-desk). Login credentials
+# are never here at all: agent_user_id is a cross-database logical FK to
+# id_user.id (OPZUSER).
+entity: mkt_agent_profile
+table: mkt_agent_profile
+version: 1
+database: OPZMARKET
+columns:
+  - name: agent_user_id
+    type: uuid
+    primary_key: true
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER). PK is also the FK — one profile row per login user.
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: marketing_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: >
+      Allowed values governed by id_field_definition. TELECALLER |
+      DIGITAL_MARKETER | FIELD_AGENT | CAMPAIGN_MANAGER | CUSTOM.
+  - name: linked_person_id
+    type: uuid
+    nullable: true
+    comment: >
+      Optional cross-database logical FK to ppl_person.id (OPZPEOPLE,
+      apps/manage-my-people). Only meaningful when that app is installed;
+      when set, department/designation/manager/joining-date belong there,
+      never duplicated here.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_agent_profile_company_type
+    columns: [company_id, marketing_type]
+  - name: idx_mkt_agent_profile_linked_person
+    columns: [linked_person_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: linked_person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: restrict

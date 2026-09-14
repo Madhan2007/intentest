@@ -1,0 +1,36 @@
+# Single-row marker (OPZHUB): which product THIS deployment was built and
+# packaged for. Mirrors licensing/db/schema/platform_product.yaml (OPZMAIN)
+# into the per-company database so a COMPANY_BE deployment (doc 25 §3.3),
+# which manages its own DB and may never reach OPZMAIN, can still answer
+# "which product am I" locally. Seeded automatically at every startup from
+# platform/config/product.yaml (written once by
+# infra/wrappers/package-product.sh) — never from a runtime argument
+# (doc 35 §3.5). Exactly one row ever exists, keyed by the fixed literal
+# singleton_key = 'default'.
+entity: company_active_product
+table: company_active_product
+version: 1
+database: OPZHUB
+columns:
+  - name: singleton_key
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 16
+    comment: Always the literal value "default" — guarantees exactly one row.
+
+  - name: product_key
+    type: text
+    nullable: false
+    max_length: 64
+    comment: >
+      Cross-database reference to OPZMAIN.product_catalog.product_key —
+      app-enforced only, Postgres cannot create this FK across databases.
+
+  - name: activated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+
+indexes: []
+foreign_keys: []

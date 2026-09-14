@@ -1,0 +1,57 @@
+# dsk_company_setting — one row per company: business hours (used by SLA
+# business-hours-only clock calculations) and default commercial-
+# clearance terms for new tickets. Matches the reference app's
+# TENANT_COMPANY_SETTINGS.
+entity: dsk_company_setting
+table: dsk_company_setting
+version: 1
+database: OPZDESK
+columns:
+  - name: company_id
+    type: uuid
+    primary_key: true
+    nullable: false
+  - name: timezone
+    type: text
+    nullable: false
+    default: "'UTC'"
+    max_length: 50
+  - name: working_hours_start
+    type: text
+    nullable: false
+    default: "'09:00:00'"
+    comment: HH:MM:SS, business-hours-only SLA calculations read this.
+  - name: working_hours_end
+    type: text
+    nullable: false
+    default: "'18:00:00'"
+  - name: work_days
+    type: text
+    nullable: false
+    default: "'MON,TUE,WED,THU,FRI'"
+    comment: Comma-separated three-letter day codes.
+  - name: require_advance_payment_default
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: advance_payment_percentage_default
+    type: numeric
+    nullable: false
+    default: "50"
+  - name: updated_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: updated_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

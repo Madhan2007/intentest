@@ -1,0 +1,43 @@
+# ppl_person_code_sequence — per-company, per-prefix counter used to
+# generate ppl_person.person_code (preview/validate/reserve, same pattern
+# as the reference app's employee-code generator). Deliberately company +
+# prefix scoped only (no nullable org-unit scope column) — a nullable
+# column inside a unique index would let Postgres treat two NULLs as
+# distinct and silently allow duplicate sequences.
+entity: ppl_person_code_sequence
+table: ppl_person_code_sequence
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: prefix
+    type: text
+    nullable: false
+    max_length: 16
+    default: "''"
+  - name: next_number
+    type: bigint
+    nullable: false
+    default: "1"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_code_sequence_company_prefix
+    columns: [company_id, prefix]
+    unique: true
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. App-enforced at write time (doc 28 §3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

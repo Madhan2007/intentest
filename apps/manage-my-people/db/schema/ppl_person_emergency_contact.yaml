@@ -1,0 +1,45 @@
+# ppl_person_emergency_contact — replaces the reference app's fixed
+# three-slot columns (emergency_contact_1/2/3 name/relation/phone) with a
+# normal child list. Any number of contacts, ordered by priority_order.
+entity: ppl_person_emergency_contact
+table: ppl_person_emergency_contact
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: contact_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: relation
+    type: text
+    nullable: true
+    max_length: 64
+  - name: phone
+    type: text
+    nullable: false
+    max_length: 32
+  - name: priority_order
+    type: integer
+    nullable: false
+    default: "1"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_emergency_contact_person
+    columns: [person_id, priority_order]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

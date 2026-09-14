@@ -1,0 +1,55 @@
+# mkt_call_queue — a telemarketing dialer queue.
+entity: mkt_call_queue
+table: mkt_call_queue
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: queue_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: description
+    type: text
+    nullable: true
+  - name: priority
+    type: integer
+    nullable: false
+    default: "0"
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: ACTIVE | PAUSED | ARCHIVED.
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_call_queue_company_status
+    columns: [company_id, status]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

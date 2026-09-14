@@ -1,0 +1,107 @@
+# fin_invoice — a bill issued to a customer. Drops the reference app's
+# subscription_id (subscription/plan billing is a future phase — see
+# design doc), gst_number/customer_phone (denormalized copies of
+# fin_customer fields — read via customer_id instead), and
+# tax_percentage (a single flat rate on the invoice header; real tax
+# varies per line item, already correctly modeled on
+# fin_invoice_line_item.tax_rate — the header-level duplicate was
+# redundant in the reference).
+entity: fin_invoice
+table: fin_invoice
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: invoice_number
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via fin_code_sequence (sequence_type = INVOICE).
+  - name: customer_id
+    type: uuid
+    nullable: false
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'DRAFT'"
+    comment: DRAFT | OPEN | PAID | PARTIALLY_PAID | OVERDUE | VOID | UNCOLLECTIBLE.
+  - name: currency
+    type: text
+    nullable: false
+    max_length: 3
+    comment: ISO 4217 code.
+  - name: subtotal
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: tax_total
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: total
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: amount_paid
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: Maintained from fin_payment_allocation rows — never client-writable.
+  - name: amount_due
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: total - amount_paid, maintained alongside amount_paid.
+  - name: invoice_date
+    type: date
+    nullable: false
+  - name: due_date
+    type: date
+    nullable: true
+  - name: paid_at
+    type: timestamptz
+    nullable: true
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_invoice_company_number
+    columns: [company_id, invoice_number]
+    unique: true
+  - name: idx_fin_invoice_company_status
+    columns: [company_id, status]
+  - name: idx_fin_invoice_customer
+    columns: [customer_id]
+  - name: idx_fin_invoice_due_date
+    columns: [due_date]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: customer_id
+    references_table: fin_customer
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

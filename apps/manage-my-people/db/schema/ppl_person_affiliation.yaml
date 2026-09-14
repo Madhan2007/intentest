@@ -1,0 +1,97 @@
+# ppl_person_affiliation — where a person sits in the org, their role/grade,
+# and their relationship rows (manager, skip-manager, mentor, buddy, HRBP).
+# One table with `relation_type` + effective dates replaces five separate
+# nullable FK columns (manager_id, skip_manager_id, mentor_id, buddy_id,
+# hrbp_id) that the reference app carried directly on the person row — this
+# also gives history (effective_from/effective_to) for free.
+entity: ppl_person_affiliation
+table: ppl_person_affiliation
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: org_unit_id
+    type: uuid
+    nullable: true
+    comment: FK -> ppl_org_unit.id (department/division/location/... per unit_type).
+  - name: role_grade_id
+    type: uuid
+    nullable: true
+    comment: FK -> ppl_role_grade.id (designation/grade/band/... per grade_type).
+  - name: cost_center_unit_id
+    type: uuid
+    nullable: true
+    comment: FK -> ppl_org_unit.id where unit_type = COST_CENTER.
+  - name: position_title
+    type: text
+    nullable: true
+    max_length: 200
+  - name: manager_person_id
+    type: uuid
+    nullable: true
+    comment: FK -> ppl_person.id. Populated for relation_type in (SKIP_MANAGER, MENTOR, BUDDY, HRBP).
+  - name: relation_type
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PRIMARY'"
+    comment: >
+      PRIMARY | SECONDARY | MENTOR | BUDDY | HRBP | SKIP_MANAGER.
+      PRIMARY is the row that drives org_unit_id / role_grade_id for the
+      person's current placement; ppl_person.manager_person_id mirrors the
+      current PRIMARY row's manager for fast reads.
+  - name: effective_from
+    type: date
+    nullable: false
+    default: CURRENT_DATE
+  - name: effective_to
+    type: date
+    nullable: true
+  - name: is_current
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_affiliation_person_current
+    columns: [person_id, is_current]
+  - name: idx_ppl_person_affiliation_org_unit
+    columns: [org_unit_id]
+  - name: idx_ppl_person_affiliation_manager
+    columns: [manager_person_id]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: org_unit_id
+    references_table: ppl_org_unit
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: role_grade_id
+    references_table: ppl_role_grade
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: cost_center_unit_id
+    references_table: ppl_org_unit
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: manager_person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

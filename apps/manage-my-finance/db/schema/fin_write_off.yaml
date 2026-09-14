@@ -1,0 +1,51 @@
+# fin_write_off — an uncollectible invoice amount written off. Same
+# "wired-but-fieldless in the reference" note as fin_payment_transaction.yaml.
+entity: fin_write_off
+table: fin_write_off
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: invoice_id
+    type: uuid
+    nullable: false
+  - name: amount
+    type: numeric
+    nullable: false
+  - name: reason
+    type: text
+    nullable: true
+  - name: approved_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: written_off_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_write_off_company
+    columns: [company_id]
+  - name: idx_fin_write_off_invoice
+    columns: [invoice_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: invoice_id
+    references_table: fin_invoice
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: approved_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

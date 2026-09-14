@@ -1,0 +1,62 @@
+# Product registry (OPZMAIN). A product groups a subset of apps/ folders
+# under one packaged/branded offering (doc 35). Current products:
+# managemyopz (default), managemyid, smartaicampus.
+# Seeded from platform/catalog/products.yaml at startup — never hand-edited
+# in a live database.
+entity: product_catalog
+table: product_catalog
+version: 1
+database: OPZMAIN
+columns:
+  - name: product_key
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 64
+    comment: >
+      Stable slug identifying the product, e.g. "managemyopz". Matches the
+      --product argument accepted by the packaging script and the value
+      stored on company_information.product_key and
+      application_catalog.product_key.
+
+  - name: product_name
+    type: text
+    nullable: false
+    max_length: 200
+
+  - name: description
+    type: text
+    nullable: true
+    max_length: 500
+
+  - name: logo_uri
+    type: text
+    nullable: true
+    max_length: 500
+    comment: >
+      Default product-level branding shown before a company is resolved.
+      Overridden per company by company_information.logo_uri once a
+      company is typed/resolved on the login screen (doc 35 §4).
+
+  - name: icon_key
+    type: text
+    nullable: true
+    max_length: 64
+
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'active'"
+    comment: active | deprecated
+
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+
+indexes:
+  - name: idx_product_catalog_status
+    columns: [status]
+
+foreign_keys: []

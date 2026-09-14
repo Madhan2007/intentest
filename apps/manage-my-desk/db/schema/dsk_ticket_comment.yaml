@@ -1,0 +1,59 @@
+# dsk_ticket_comment — a comment/reply on a ticket, internal or visible
+# to the client. Matches the reference app's TICKET_COMMENT_DETAIL,
+# which already cleanly separates comments from status-transition
+# history (TICKET_HISTORY_LOG, dsk_ticket_status_history.yaml) — unlike
+# opz-desk's earlier-reviewed reference, no consolidation was needed
+# here.
+entity: dsk_ticket_comment
+table: dsk_ticket_comment
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: author_user_id
+    type: uuid
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: comment_text
+    type: text
+    nullable: false
+  - name: is_internal_only
+    type: boolean
+    nullable: false
+    default: "false"
+    comment: True hides this comment from the client portal.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_comment_ticket
+    columns: [ticket_id, created_at]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: author_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

@@ -1,0 +1,63 @@
+# fin_code_sequence — one shared, atomic counter table for every numbered
+# document this app generates (invoice, credit note, customer code),
+# instead of a separate sequence table per document type. Consolidates
+# the reference app's InvoiceSequence (which was already a good
+# per-company-per-year design: tenantId + year + lastSequence) by adding
+# sequence_type so credit notes and customer codes reuse the same
+# mechanism rather than each getting their own near-identical table —
+# same generalize-via-discriminator technique used throughout this
+# session (ppl_org_unit, dsk_category, dat_category, ...). fiscal_year is
+# kept from the reference's design: many jurisdictions require invoice
+# numbering to reset (or at least be traceable) per fiscal year, unlike
+# the simpler company+prefix-only sequences in the other three
+# apps/manage-my-* designs.
+entity: fin_code_sequence
+table: fin_code_sequence
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: sequence_type
+    type: text
+    nullable: false
+    max_length: 16
+    comment: INVOICE | CREDIT_NOTE | CUSTOMER.
+  - name: fiscal_year
+    type: integer
+    nullable: false
+    default: "0"
+    comment: >
+      0 = not year-scoped (e.g. CUSTOMER). Deliberately NOT NULL with a
+      sentinel rather than nullable: a nullable column inside the unique
+      index below would let Postgres treat two NULLs as distinct and
+      silently allow duplicate sequences — the same pitfall documented on
+      apps/manage-my-people's ppl_person_code_sequence.yaml.
+  - name: prefix
+    type: text
+    nullable: false
+    max_length: 16
+    default: "''"
+  - name: next_number
+    type: bigint
+    nullable: false
+    default: "1"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_code_sequence_company_type_year_prefix
+    columns: [company_id, sequence_type, fiscal_year, prefix]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

@@ -1,0 +1,101 @@
+# fin_credit_note — a credit issued against a customer/invoice. Drops the
+# reference app's expense_type/custom_expense_label/expense_cost columns
+# — an unrelated "expense" concept awkwardly stuffed onto CreditNote in
+# the reference, not a real credit-note attribute. If a business-expense
+# feature is ever designed, it belongs in its own table, not here.
+entity: fin_credit_note
+table: fin_credit_note
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: credit_note_number
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via fin_code_sequence (sequence_type = CREDIT_NOTE).
+  - name: customer_id
+    type: uuid
+    nullable: false
+  - name: invoice_id
+    type: uuid
+    nullable: true
+    comment: The invoice this credit note reduces, if any.
+  - name: credit_type
+    type: text
+    nullable: false
+    max_length: 16
+    comment: REFUNDABLE | ADJUSTMENT.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'DRAFT'"
+    comment: DRAFT | ISSUED | VOID.
+  - name: currency
+    type: text
+    nullable: false
+    max_length: 3
+  - name: total
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: allocated_amount
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: Portion already applied to an invoice or refund. Maintained, not client-writable.
+  - name: available_amount
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: total - allocated_amount.
+  - name: credit_date
+    type: date
+    nullable: false
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_credit_note_company_number
+    columns: [company_id, credit_note_number]
+    unique: true
+  - name: idx_fin_credit_note_customer
+    columns: [customer_id]
+  - name: idx_fin_credit_note_invoice
+    columns: [invoice_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: customer_id
+    references_table: fin_customer
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: invoice_id
+    references_table: fin_invoice
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

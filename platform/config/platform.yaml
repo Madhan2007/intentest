@@ -1,0 +1,166 @@
+schema_version: "2026.1"
+
+solution:
+  id: kernel-dev
+  display_name: ManageMyOpz Kernel (dev)
+  profile: dev                    # dev | staging | prod (doc 17)
+
+deploy:
+  mode: site                      # site | central (doc 20)
+  company: dev
+
+clients:
+  web: true
+  mobile: true
+
+gui:
+  mode: lite                      # lite | rich (doc 03 §2.1)
+  allow_user_choice: true
+
+kernel:
+  api_version: "2026.1"
+
+runtime:
+  user: tsuser
+  uid: 2100
+  gid: 2100
+
+security:
+  allow_open_dev: false           # must stay false even in dev unless explicitly testing
+  session_ttl_seconds: 28800
+  auth:
+    methods: [password]           # only password wired in this first implementation pass
+    password:
+      enabled: true
+      lockout_attempts: 8
+  access:
+    matrix_format: letters
+  forms:
+    envelope_cache_seconds: 60
+    io_max_rows: 10000
+    io_max_upload_mb: 8
+  errors:
+    debug: true                   # dev only — illegal in prod (doc 24)
+  tls:
+    mode: none                    # none in dev; required in prod overlay (doc 12)
+
+hang:
+  http_ms: 15000
+  java_python_ms: 8000
+  db_checkout_ms: 3000
+  db_statement_ms: 20000
+  cache_ms: 500
+  broker_ack_ms: 10000
+  job_default_s: 300
+  job_kill_after_s: 15
+  ws_idle_s: 90
+  lock_stale_s: 3600
+
+db:
+  type: ${DB_TYPE:postgres}                    # postgres by default (doc 17 §3); override to memory if needed
+  required_capabilities: [acid_transactions, relational_constraints]
+  migrations:
+    dialect: postgres
+  postgres:
+    host: postgres
+    port: 5432
+    database: erp
+    user: erp_app
+    password: ${POSTGRES_PASSWORD:devpassword}
+    ssl_mode: disable
+    pool_min: 2
+    pool_max: 8
+    ai_user: ai_app
+  memory: {}
+
+# Additional named Postgres databases (doc: multi-database routing). Same erp_app
+# role/password as db.postgres above (Postgres roles are cluster-wide) — only the
+# database name differs. `db.postgres` above remains the default connection for
+# anything that does not declare a `database:` in its db/schema/*.yaml.
+databases:
+  OPZUSER:
+    host: postgres
+    port: 5432
+    database: opzuser
+    user: erp_app
+    password: ${POSTGRES_PASSWORD:devpassword}
+    pool_max: 8
+  OPZMAIN:
+    host: postgres
+    port: 5432
+    database: opzmain
+    user: erp_app
+    password: ${POSTGRES_PASSWORD:devpassword}
+    pool_max: 8
+  OPZHUB:
+    host: postgres
+    port: 5432
+    database: opzhub
+    user: erp_app
+    password: ${POSTGRES_PASSWORD:devpassword}
+    pool_max: 8
+
+cache:
+  type: memory                    # memory in dev; valkey in staging/prod
+  required_capabilities: [pubsub_horizontal, ttl_keys]
+  valkey:
+    host: valkey
+    port: 6380
+    tls: false
+    password: ${VALKEY_PASSWORD:devpassword}
+    db: 0
+    key_prefix: erp
+    pool_max: 16
+  memory:
+    max_keys: 10000
+
+broker:
+  type: memory                    # memory in dev; valkey (Streams) in staging/prod
+  required_capabilities: [competing_consumers, ack, retry]
+  valkey:
+    host: valkey
+    port: 6380
+    tls: false
+    password: ${VALKEY_PASSWORD:devpassword}
+    db: 2
+    stream_maxlen: 100000
+
+http:
+  opzhub-be-app:
+    internal_url: http://localhost:8114
+    port: 8114
+  opzhub-be-core:
+    internal_url: http://localhost:8117
+    port: 8117
+  opzhub-web-app:
+    internal_url: http://localhost:8109
+    port: 8109
+  opzhub-ui-service:
+    container_https: 8102
+  public:
+    origin: http://localhost:5173
+
+realtime:
+  ws_path: /ws/opzhub
+  heartbeat_seconds: 25
+  nginx_read_timeout_seconds: 3600
+
+python:
+  vision:
+    quality: auto
+    auto:
+      high_min_ram_mb: 4096
+      high_min_cpus: 2
+      prefer_gpu: false
+
+modules:
+  enabled: [identity, admin, crud, licensing, apps]
+  disabled: []
+
+logging:
+  level: INFO
+  json: true
+
+backup:
+  enabled: false
+  migrate_on_start: true

@@ -1,0 +1,27 @@
+id: admin
+version: 0.1.0
+title: Solution settings
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /admin
+  api_prefixes:
+    - /api/v1/opzhub/admin
+  workers: []
+  events: []
+  menus:
+    - id: admin.settings
+      parent: null
+migrations:
+  backend: false
+  python: false
+access:
+  features:
+    - { id: set, title: Settings }

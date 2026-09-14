@@ -1,0 +1,44 @@
+# ppl_leave_type — company-managed leave/absence type catalog (e.g.
+# Annual, Sick, Unpaid for an employee; Excused Absence for a student).
+entity: ppl_leave_type
+table: ppl_leave_type
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: leave_type_code
+    type: text
+    nullable: false
+    max_length: 32
+  - name: leave_type_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: is_paid
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_leave_type_company_code
+    columns: [company_id, leave_type_code]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

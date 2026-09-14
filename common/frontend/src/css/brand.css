@@ -1,0 +1,128 @@
+/**
+ * Organization: Technosprint info Solutions
+ * Owner: Logaraj S
+ * Created at: 2026-09-10
+ * Description: Reusable brand chrome (logo, company name, theme toggle).
+ */
+
+@import "./tokens.css";
+
+.mmo-theme-control-wrapper {
+  position: absolute;
+  top: 3%;
+  right: 4%;
+  z-index: 50;
+}
+
+.mmo-theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 9999px;
+  padding: 3px 12px 3px 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.mmo-theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+.mmo-toggle-switch {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 9999px;
+  padding: 2px 5px 2px 2px;
+  gap: 4px;
+}
+
+.mmo-toggle-knob {
+  width: 18px;
+  height: 18px;
+  background: var(--mmo-color-white);
+  border-radius: 50%;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.mmo-toggle-sun {
+  color: var(--mmo-color-white);
+  opacity: 0.9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1px;
+}
+
+.mmo-toggle-text {
+  color: var(--mmo-color-white);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.mmo-brand-header {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.mmo-logo-badge {
+  width: 68px;
+  height: 68px;
+  background: var(--mmo-color-white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  flex-shrink: 0;
+}
+
+.mmo-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.mmo-company-name {
+  color: var(--mmo-color-white);
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.mmo-tagline {
+  color: var(--mmo-color-tagline);
+  font-size: 15px;
+  font-weight: 400;
+  margin: 5px 0 0 0;
+  letter-spacing: 0.1px;
+}
+
+@media (max-width: 880px) {
+  .mmo-theme-control-wrapper {
+    top: 14px;
+    right: 16px;
+    position: fixed;
+  }
+}
+
+@media (max-width: 480px) {
+  .mmo-company-name {
+    font-size: 23px;
+  }
+}

@@ -1,0 +1,82 @@
+# mkt_call_log — a completed call record. recording_url stores a link,
+# never raw audio bytes — same file_url-not-blob discipline as
+# dsk_ticket_attachment (apps/manage-my-desk).
+entity: mkt_call_log
+table: mkt_call_log
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: queue_id
+    type: uuid
+    nullable: true
+  - name: lead_id
+    type: uuid
+    nullable: true
+  - name: agent_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: phone_number
+    type: text
+    nullable: false
+    max_length: 32
+  - name: connection_status
+    type: text
+    nullable: false
+    max_length: 16
+    comment: CONNECTED | NO_ANSWER | BUSY | FAILED | VOICEMAIL.
+  - name: disposition
+    type: text
+    nullable: true
+    max_length: 100
+  - name: duration_seconds
+    type: integer
+    nullable: false
+    default: "0"
+  - name: recording_url
+    type: text
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+  - name: scheduled_followup_at
+    type: timestamptz
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_call_log_company_created
+    columns: [company_id, created_at]
+  - name: idx_mkt_call_log_lead
+    columns: [lead_id]
+  - name: idx_mkt_call_log_agent
+    columns: [agent_user_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: queue_id
+    references_table: mkt_call_queue
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

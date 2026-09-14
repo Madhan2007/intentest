@@ -1,0 +1,62 @@
+# ppl_person_timeline — append-only lifecycle event log for a person.
+# Distinct from the platform's generic audit log: this is a curated,
+# user-facing history ("Promoted to Senior Engineer on 2026-04-01"), not a
+# before/after diff of every field write.
+entity: ppl_person_timeline
+table: ppl_person_timeline
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: event_type
+    type: text
+    nullable: false
+    max_length: 32
+    comment: >
+      JOINING | CONFIRMATION | PROMOTION | TRANSFER | RECOGNITION |
+      TRAINING | CERTIFICATION | WARNING | SUSPENSION | EXIT | REHIRE |
+      ROLE_CHANGE | ORG_UNIT_CHANGE | CUSTOM.
+  - name: event_date
+    type: date
+    nullable: false
+  - name: title
+    type: text
+    nullable: false
+    max_length: 200
+  - name: description
+    type: text
+    nullable: true
+  - name: metadata_json
+    type: jsonb
+    nullable: true
+    comment: Structured event detail (e.g. {"from_grade":"G3","to_grade":"G4"}).
+  - name: triggered_by_person_id
+    type: uuid
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_timeline_person_date
+    columns: [person_id, event_date]
+  - name: idx_ppl_person_timeline_event_type
+    columns: [event_type]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: triggered_by_person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

@@ -1,0 +1,59 @@
+# dat_business_inquiry — a public inquiry submitted against a listed
+# business. inquirer_user_id is optional: an inquiry may come from a
+# logged-in individual_buyer or an anonymous public visitor (name/email
+# fallback), same optional-login pattern used for requesters in
+# apps/manage-my-desk's dsk_ticket. The reference app's `inquiries` table
+# existed only in schema.sql with no controller/repository wired to it —
+# this design completes it rather than dropping it, since a directory
+# without an inquiry path is not a usable requirement.
+entity: dat_business_inquiry
+table: dat_business_inquiry
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: business_id
+    type: uuid
+    nullable: false
+  - name: inquirer_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER). Null for anonymous inquiries.
+  - name: inquirer_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: inquirer_email
+    type: text
+    nullable: false
+    max_length: 200
+  - name: message
+    type: text
+    nullable: false
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'NEW'"
+    comment: NEW | RESPONDED | CLOSED.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_business_inquiry_business_status
+    columns: [business_id, status]
+foreign_keys:
+  - column: business_id
+    references_table: dat_business
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: inquirer_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

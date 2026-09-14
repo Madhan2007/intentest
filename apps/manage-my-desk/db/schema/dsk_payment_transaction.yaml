@@ -1,0 +1,94 @@
+# dsk_payment_transaction — an advance/commercial payment against a
+# ticket. Matches the reference app's FINANCE_PAYMENT_TRANSACTION,
+# supporting both a manual proof-of-payment flow (receipt upload +
+# staff verification) and an online gateway. gateway_session_id /
+# gateway_customer_id generalize the reference's STRIPE_SESSION_ID /
+# STRIPE_CUSTOMER_ID columns (added in a later migration hardcoded to
+# one vendor) — this app should not be locked to a single payment
+# provider by its column names.
+entity: dsk_payment_transaction
+table: dsk_payment_transaction
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: client_id
+    type: uuid
+    nullable: false
+  - name: payment_reference
+    type: text
+    nullable: false
+    max_length: 100
+  - name: amount
+    type: numeric
+    nullable: false
+  - name: payment_method
+    type: text
+    nullable: false
+    max_length: 24
+    comment: ONLINE_GATEWAY | BANK_TRANSFER | CHEQUE.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | VERIFIED | REJECTED.
+  - name: receipt_url
+    type: text
+    nullable: true
+    comment: Uploaded proof-of-payment for BANK_TRANSFER/CHEQUE; not applicable for ONLINE_GATEWAY.
+  - name: gateway_session_id
+    type: text
+    nullable: true
+  - name: gateway_customer_id
+    type: text
+    nullable: true
+  - name: verified_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: verified_at
+    type: timestamptz
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_payment_transaction_ticket
+    columns: [ticket_id]
+  - name: idx_dsk_payment_transaction_company_status
+    columns: [company_id, status]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: client_id
+    references_table: dsk_client_account
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: verified_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

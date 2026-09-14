@@ -1,0 +1,8 @@
+{
+  "product_key": "smartaicampus",
+  "product_name": "SmartAI Campus",
+  "logo_uri": "/branding/products/smartaicampus/logo.svg",
+  "icon_key": "smartaicampus",
+  "primary_color": "#7c3aed",
+  "_comment": "Placeholder for a planned product. No apps/ folders exist for this product yet (see platform/catalog/products.yaml). Replace when apps are built."
+}

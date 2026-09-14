@@ -1,0 +1,67 @@
+# Product catalog of applications that can appear in the 9-dot launcher.
+# Lives on OPZHUB. Company-specific license/install state is company_application.
+entity: application_catalog
+table: application_catalog
+version: 1
+database: OPZHUB
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: app_key
+    type: text
+    nullable: false
+    unique: true
+    max_length: 64
+  - name: product_code
+    type: text
+    nullable: true
+    unique: true
+    max_length: 16
+  - name: category
+    type: text
+    nullable: true
+    max_length: 32
+  - name: display_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: description
+    type: text
+    nullable: false
+    max_length: 500
+  - name: icon_key
+    type: text
+    nullable: false
+    max_length: 32
+  - name: icon_background_color
+    type: text
+    nullable: false
+    max_length: 16
+  - name: sort_order
+    type: integer
+    nullable: false
+  - name: details
+    type: jsonb
+    nullable: true
+  - name: product_key
+    type: text
+    nullable: true
+    max_length: 64
+    default: "'managemyopz'"
+    comment: >
+      Which product (platform/catalog/products.yaml) this app belongs to.
+      Backfilled by ApplicationCatalogSeed from the products.yaml app list.
+      Cross-database reference to OPZMAIN.product_catalog — app-enforced
+      only, Postgres cannot create this FK across databases.
+indexes:
+  - name: idx_application_catalog_sort_order
+    columns: [sort_order]
+  - name: idx_application_catalog_category
+    columns: [category]
+  - name: idx_application_catalog_product_key
+    columns: [product_key]
+foreign_keys: []

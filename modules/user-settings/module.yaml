@@ -1,0 +1,28 @@
+id: user-settings
+version: 0.1.0
+title: User profile & preferences (OPZUSER)
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /settings/profile
+  api_prefixes:
+    - /api/v1/opzhub/user-settings
+  workers: []
+  events: []
+  menus:
+    - id: user-settings.profile
+      parent: null
+      title: My Settings
+migrations:
+  backend: true
+  python: false
+access:
+  features:
+    - { id: prof, title: Profile }

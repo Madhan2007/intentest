@@ -1,0 +1,63 @@
+# dsk_activity_screenshot — employee activity-monitoring screenshot tied
+# to work on a ticket. Matches the reference app's
+# ACTIVITY_SCREENSHOT_LOG, which already stores only an object-storage
+# key (s3_object_key), not inline image bytes — a correctly-designed
+# reference table, kept as-is.
+entity: dsk_activity_screenshot
+table: dsk_activity_screenshot
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: agent_user_id
+    type: uuid
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: storage_object_key
+    type: text
+    nullable: false
+    comment: Object-storage key/reference, never inline image bytes.
+  - name: window_title
+    type: text
+    nullable: true
+    max_length: 255
+  - name: activity_score
+    type: integer
+    nullable: false
+    default: "100"
+  - name: captured_at
+    type: timestamptz
+    nullable: false
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_activity_screenshot_agent_ticket
+    columns: [agent_user_id, ticket_id]
+  - name: idx_dsk_activity_screenshot_captured
+    columns: [captured_at]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

@@ -1,0 +1,36 @@
+id: company-setup
+version: 0.1.0
+title: Company, server & backend-endpoint management (OPZMAIN)
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /admin/company-setup
+  api_prefixes:
+    - /api/v1/opzhub/company-setup
+  workers: []
+  events: []
+  menus:
+    - id: company-setup.companies
+      parent: null
+      title: Companies
+    - id: company-setup.server-details
+      parent: null
+      title: Server Details
+    - id: company-setup.backend-endpoints
+      parent: null
+      title: Backend Endpoints
+migrations:
+  backend: true
+  python: false
+access:
+  features:
+    - { id: co, title: Companies }
+    - { id: srv, title: Server Details }
+    - { id: bep, title: Backend Endpoints }

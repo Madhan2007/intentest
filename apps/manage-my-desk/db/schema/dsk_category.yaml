@@ -1,0 +1,53 @@
+# dsk_category — company-managed ticket category catalog (the reference
+# app's CATEGORY_MASTER). The reference bolts a crude per-category
+# single-dropdown mechanism directly onto this table
+# (CATEGORY_TYPE/DROPDOWN_LABEL/DROPDOWN_OPTIONS, the latter a
+# comma-separated free-text string) — this design removes it entirely:
+# any category-specific custom field (e.g. "Card Size / Template" for an
+# ID-card category) is an id_field_definition row under
+# form_id = "manage-my-desk.ticket.custom.<category_code>", with real
+# structured allowed_values, valued in dsk_ticket_custom_field — the
+# same GUI-metadata mechanism every other apps/manage-my-* app already
+# uses instead of an ad hoc column.
+entity: dsk_category
+table: dsk_category
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: category_code
+    type: text
+    nullable: false
+    max_length: 48
+    comment: Slug used as the id_field_definition form_id suffix for this category's custom fields.
+  - name: category_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: description
+    type: text
+    nullable: true
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_category_company_code
+    columns: [company_id, category_code]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

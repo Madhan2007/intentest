@@ -1,0 +1,7 @@
+schema_version: "2026.1"
+level: INFO
+json: true
+fields:
+  - solution_id
+  - module_id
+  - correlation_id

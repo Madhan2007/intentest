@@ -1,0 +1,60 @@
+# ppl_person_identifier — generic government/compliance identifiers.
+# Replaces fixed columns (pan_number, aadhaar_number, uan_number,
+# esic_number, passport_number, ...) with one extensible, country-neutral
+# list. New identifier types (any country, any scheme) are a metadata/data
+# change, never a migration.
+entity: ppl_person_identifier
+table: ppl_person_identifier
+version: 1
+database: OPZPEOPLE
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: identifier_type
+    type: text
+    nullable: false
+    max_length: 32
+    comment: >
+      Allowed values governed by id_field_definition. Starting set:
+      NATIONAL_ID | TAX_ID | SOCIAL_INSURANCE_ID | PASSPORT |
+      DRIVING_LICENSE | CUSTOM.
+  - name: identifier_value
+    type: text
+    nullable: false
+    max_length: 64
+    comment: >
+      Sensitive. Never returned in list/collection responses — only on the
+      single-record GET for a user holding the "idn" feature's `v` grant
+      (see requirement doc, API-Level RBAC/ABAC section).
+  - name: issuing_country
+    type: text
+    nullable: true
+    max_length: 100
+  - name: expires_on
+    type: date
+    nullable: true
+  - name: is_verified
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_identifier_person_type
+    columns: [person_id, identifier_type]
+    unique: true
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

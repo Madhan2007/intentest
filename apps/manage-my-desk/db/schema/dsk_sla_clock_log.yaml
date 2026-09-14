@@ -1,0 +1,58 @@
+# dsk_sla_clock_log — SLA clock state transitions with pause/resume
+# accounting. Matches the reference app's SLA_CLOCK_LOG_DETAIL closely —
+# this was already a well-designed table (clock_state, paused_duration,
+# accumulated_active_seconds), kept as-is rather than "fixed."
+entity: dsk_sla_clock_log
+table: dsk_sla_clock_log
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: previous_status
+    type: text
+    nullable: true
+    max_length: 32
+  - name: new_status
+    type: text
+    nullable: false
+    max_length: 32
+  - name: clock_state
+    type: text
+    nullable: false
+    max_length: 16
+    comment: RUNNING | PAUSED | RESUMED | COMPLETED | BREACHED.
+  - name: action_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: paused_duration_seconds
+    type: bigint
+    nullable: false
+    default: "0"
+  - name: accumulated_active_seconds
+    type: bigint
+    nullable: false
+    default: "0"
+indexes:
+  - name: idx_dsk_sla_clock_log_ticket
+    columns: [ticket_id, action_at]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

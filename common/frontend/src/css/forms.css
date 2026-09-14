@@ -1,0 +1,185 @@
+/**
+ * Organization: Technosprint info Solutions
+ * Owner: Logaraj S
+ * Created at: 2026-09-10
+ * Description: Reusable form controls shared across operation screens.
+ */
+
+@import "./tokens.css";
+
+.mmo-form {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 380px;
+}
+
+.mmo-form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.mmo-form-label {
+  color: var(--mmo-color-text-muted);
+  font-size: 13.5px;
+  font-weight: 500;
+  margin-bottom: 7px;
+}
+
+.mmo-input-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.mmo-input {
+  width: 100%;
+  height: var(--mmo-input-height);
+  background: var(--mmo-color-input-bg);
+  border: 1px solid var(--mmo-color-border);
+  border-radius: var(--mmo-radius-input);
+  padding: 0 14px;
+  font-size: 14px;
+  color: var(--mmo-color-text-body);
+  box-sizing: border-box;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.mmo-input:focus {
+  border-color: var(--mmo-color-focus);
+  background: var(--mmo-color-white);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.mmo-input-password {
+  padding-right: 44px;
+  letter-spacing: 0.1em;
+}
+
+.mmo-password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mmo-color-text-subtle);
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.mmo-password-toggle-btn:hover {
+  color: var(--mmo-color-text-muted);
+}
+
+.mmo-form-error {
+  color: var(--mmo-color-danger);
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.mmo-option-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: -2px;
+  margin-bottom: 22px;
+}
+
+.mmo-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.mmo-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--mmo-color-checkbox-border);
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--mmo-color-white);
+  transition: all 0.15s ease;
+}
+
+.mmo-checkbox:checked {
+  background-color: var(--mmo-color-primary);
+  border-color: var(--mmo-color-primary);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3E%3C/svg%3E");
+}
+
+.mmo-checkbox-text {
+  color: var(--mmo-color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mmo-text-link {
+  color: var(--mmo-color-text-muted);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.mmo-text-link:hover {
+  color: var(--mmo-color-text-body);
+}
+
+.mmo-primary-btn {
+  width: 100%;
+  height: var(--mmo-input-height);
+  background: var(--mmo-color-primary);
+  border: none;
+  border-radius: var(--mmo-radius-button);
+  color: var(--mmo-color-white);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease,
+    transform 0.1s ease;
+  font-family: inherit;
+}
+
+.mmo-primary-btn:hover {
+  background: var(--mmo-color-primary-hover);
+  box-shadow: 0 4px 14px rgba(0, 128, 255, 0.35);
+}
+
+.mmo-primary-btn:active {
+  transform: scale(0.99);
+}
+
+.mmo-primary-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 480px) {
+  .mmo-option-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+}

@@ -1,0 +1,44 @@
+# mkt_audience — a saved lead segment/filter. rules_json is jsonb (the
+# reference app stores this as a free-text string column,
+# `rulesDefinition`) so segment rules are queryable/introspectable, not
+# an opaque blob.
+entity: mkt_audience
+table: mkt_audience
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: audience_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: description
+    type: text
+    nullable: true
+  - name: rules_json
+    type: jsonb
+    nullable: true
+    comment: Structured segment filter, e.g. {"status":"QUALIFIED","source_detail":"Google Ads"}.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_audience_company_name
+    columns: [company_id, audience_name]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

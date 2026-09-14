@@ -1,0 +1,7 @@
+# Ships inside the release tree. Replaced on every upgrade.
+# Site identity (solution id) lives in /etc/opzhub, not here.
+PRODUCT=ManageMyOpz
+SHORT=opzhub
+VERSION=0.0.0-dev
+BUILD=
+BUILT_AT=

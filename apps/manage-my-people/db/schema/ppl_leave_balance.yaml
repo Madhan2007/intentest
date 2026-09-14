@@ -1,0 +1,75 @@
+# ppl_leave_balance — a person's leave balance for one leave type in one
+# year. used_days/pending_days/balance_days are maintained columns,
+# recomputed by the service layer from ppl_leave_request rows — never
+# client-writable — same discipline as every maintained-aggregate column
+# in this design set (ppl_person's rating-style columns elsewhere,
+# dat_business.rating_average, mkt_referrer's totals,
+# fin_invoice.amount_paid).
+entity: ppl_leave_balance
+table: ppl_leave_balance
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: leave_type_id
+    type: uuid
+    nullable: false
+  - name: period_year
+    type: integer
+    nullable: false
+  - name: entitled_days
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: carried_forward_days
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: used_days
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: pending_days
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: balance_days
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: entitled_days + carried_forward_days - used_days - pending_days.
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_leave_balance_person_type_year
+    columns: [person_id, leave_type_id, period_year]
+    unique: true
+  - name: idx_ppl_leave_balance_company_year
+    columns: [company_id, period_year]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: leave_type_id
+    references_table: ppl_leave_type
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

@@ -1,0 +1,39 @@
+# ppl_holiday_calendar — a named holiday calendar (a company may run more
+# than one, e.g. per country/site).
+entity: ppl_holiday_calendar
+table: ppl_holiday_calendar
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: calendar_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: is_default
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_holiday_calendar_company_active
+    columns: [company_id, is_active]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

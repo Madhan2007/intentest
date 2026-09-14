@@ -1,0 +1,54 @@
+# dsk_ticket_status_history — append-only status-transition audit trail.
+# Matches the reference app's TICKET_HISTORY_LOG.
+entity: dsk_ticket_status_history
+table: dsk_ticket_status_history
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: actor_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER). Null for a system-generated transition.
+  - name: previous_status
+    type: text
+    nullable: false
+    max_length: 24
+  - name: new_status
+    type: text
+    nullable: false
+    max_length: 24
+  - name: change_reason
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_status_history_ticket
+    columns: [ticket_id, created_at]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: actor_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

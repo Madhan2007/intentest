@@ -1,0 +1,52 @@
+# dsk_ticket_custom_field — EAV value store for per-category custom
+# fields. Replaces the reference app's crude CATEGORY_MASTER
+# DROPDOWN_LABEL/DROPDOWN_OPTIONS mechanism (a single comma-separated
+# string column, one dropdown per category, no structured metadata) —
+# definitions instead live in id_field_definition under
+# form_id = "manage-my-desk.ticket.custom.<category_code>", with real
+# structured allowed_values (doc 26 S2). This table stores VALUES only,
+# same pattern as ppl_person_custom_field / dat_business_custom_field /
+# fin_customer_custom_field.
+entity: dsk_ticket_custom_field
+table: dsk_ticket_custom_field
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: field_key
+    type: text
+    nullable: false
+    max_length: 64
+    comment: Matches id_field_definition.field_key for this ticket's category-scoped form_id.
+  - name: field_value
+    type: text
+    nullable: true
+  - name: display_order
+    type: integer
+    nullable: false
+    default: "0"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_custom_field_ticket_key
+    columns: [ticket_id, field_key]
+    unique: true
+foreign_keys:
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

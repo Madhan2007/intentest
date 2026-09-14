@@ -1,0 +1,23 @@
+id: crud
+version: 0.1.0
+title: Generic CRUD (schema-driven, any table under db/schema/*.yaml)
+runtimes:
+  frontend: false
+  mobile: false
+  backend: true
+  python: false
+  scripts: false
+requires: []
+optional: []
+provides:
+  routes: []
+  api_prefixes:
+    - /api/v1/opzhub/db
+  workers: []
+  events: []
+  menus: []
+migrations:
+  backend: true
+  python: false
+access:
+  features: []

@@ -1,0 +1,141 @@
+# mkt_lead — unified lead/prospect record. The reference app (opz-market)
+# has FOUR overlapping lead shapes with no shared model: `Lead`
+# (social-listening-derived: userHandle/intentScore), `CrmLead`
+# (firstName/lastName/company/email/phone/status/source/value),
+# `InboxLead` (omnichannel inbox: name/phone/email/priority), and
+# `ReferralLead` (name/phone/email/referrerId/value) — plus a fifth,
+# `LeadData`, that duplicates CrmLead's contact fields under a different
+# table entirely. This design consolidates all five into one table with a
+# `lead_source_type` discriminator, the same generalize-via-discriminator
+# technique used for ppl_org_unit (apps/manage-my-people) and dsk_category
+# (apps/manage-my-desk).
+entity: mkt_lead
+table: mkt_lead
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: lead_code
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via mkt_lead_code_sequence.
+  - name: lead_source_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: >
+      Allowed values governed by id_field_definition. MANUAL | INBOX |
+      REFERRAL | CAMPAIGN | SOCIAL_MENTION. SOCIAL_MENTION is a reserved
+      value — social listening (the reference app's Mention/Keyword
+      entities) is out of scope for this drop (see design doc); the value
+      exists so a future phase can populate it without a schema change.
+  - name: first_name
+    type: text
+    nullable: true
+    max_length: 100
+  - name: last_name
+    type: text
+    nullable: true
+    max_length: 100
+  - name: display_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: company_name
+    type: text
+    nullable: true
+    max_length: 200
+  - name: email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'NEW'"
+    comment: NEW | CONTACTED | QUALIFIED | CONVERTED | LOST | DISQUALIFIED.
+  - name: source_detail
+    type: text
+    nullable: true
+    max_length: 200
+    comment: Free-text channel detail, e.g. "Google Ads", "Website Form", "Trade Show".
+  - name: estimated_value
+    type: integer
+    nullable: true
+  - name: priority
+    type: text
+    nullable: true
+    max_length: 8
+    comment: HOT | WARM | COLD.
+  - name: intent_score
+    type: integer
+    nullable: true
+    comment: Reserved for SOCIAL_MENTION-sourced leads (phase 2).
+  - name: referrer_id
+    type: uuid
+    nullable: true
+    comment: FK -> mkt_referrer.id. Set when lead_source_type = REFERRAL.
+  - name: owner_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER). Currently assigned owner; history lives in mkt_lead_assignment.
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+  - name: notes
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_lead_company_code
+    columns: [company_id, lead_code]
+    unique: true
+  - name: idx_mkt_lead_company_status
+    columns: [company_id, status]
+  - name: idx_mkt_lead_company_source_type
+    columns: [company_id, lead_source_type]
+  - name: idx_mkt_lead_owner
+    columns: [owner_user_id]
+  - name: idx_mkt_lead_referrer
+    columns: [referrer_id]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: referrer_id
+    references_table: mkt_referrer
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  # Cross-database: id_user lives on OPZUSER (always present — identity is
+  # a shared module). App-enforced (doc 28 S3).
+  - column: owner_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

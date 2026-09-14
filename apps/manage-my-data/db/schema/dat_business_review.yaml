@@ -1,0 +1,61 @@
+# dat_business_review — a public review of a listed business.
+# dat_business.rating_average / reviews_count are maintained from
+# PUBLISHED rows in this table only. Unlike the reference app (which
+# auto-publishes every review with no moderation), a status gate is added
+# here — unmoderated public review text is a real spam/abuse surface.
+entity: dat_business_review
+table: dat_business_review
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: business_id
+    type: uuid
+    nullable: false
+  - name: reviewer_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER). Null for anonymous reviews, if the company allows them.
+  - name: reviewer_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: rating
+    type: integer
+    nullable: false
+    comment: >
+      1-5. This schema DSL has no CHECK-constraint key today, so the
+      bound is enforced by DTO validation (@Min/@Max) and
+      id_field_definition rules only — two of the doc 26 S2 four layers,
+      not all four. Flagged so a future CHECK-constraint DSL addition
+      picks this column up rather than leaving it DTO-only.
+  - name: comment
+    type: text
+    nullable: true
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | PUBLISHED | REJECTED.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_business_review_business_status
+    columns: [business_id, status]
+foreign_keys:
+  - column: business_id
+    references_table: dat_business
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: reviewer_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

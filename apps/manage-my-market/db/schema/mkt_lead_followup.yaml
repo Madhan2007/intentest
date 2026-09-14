@@ -1,0 +1,65 @@
+# mkt_lead_followup — a scheduled callback/follow-up task against a lead.
+# The reference app's `FollowUp` entity duplicates the lead's name,
+# company, and phone directly on every follow-up row instead of joining
+# through lead_id — this design references lead_id only and reads those
+# fields from mkt_lead.
+entity: mkt_lead_followup
+table: mkt_lead_followup
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: reason
+    type: text
+    nullable: true
+  - name: scheduled_at
+    type: timestamptz
+    nullable: false
+  - name: assigned_agent_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: priority
+    type: text
+    nullable: true
+    max_length: 8
+    comment: HOT | WARM | COLD.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'SCHEDULED'"
+    comment: SCHEDULED | OVERDUE | RESCHEDULED | COMPLETED | MISSED | CANCELLED.
+  - name: notes
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_lead_followup_lead
+    columns: [lead_id]
+  - name: idx_mkt_lead_followup_agent_status
+    columns: [assigned_agent_user_id, status]
+foreign_keys:
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: assigned_agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

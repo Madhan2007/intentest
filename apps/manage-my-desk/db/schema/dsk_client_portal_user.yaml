@@ -1,0 +1,40 @@
+# dsk_client_portal_user — thin app-specific extension marking a login
+# user as an external client-portal user tied to one client account.
+# The reference app's AUTH_USER_MASTER mixes login credentials
+# (email/password_hash/failed_attempts/lock_time) with a USER_TYPE
+# (INTERNAL_EMPLOYEE | CLIENT_USER) and a nullable CLIENT_ID in one
+# table — a duplicate identity system, the same anti-pattern fixed in
+# every apps/manage-my-* app this session. Credentials live entirely in
+# modules/identity's id_user; this table only records the "which client
+# does this login belong to" fact that platform identity has no concept
+# of. No row here at all means the user is internal staff.
+entity: dsk_client_portal_user
+table: dsk_client_portal_user
+version: 1
+database: OPZDESK
+columns:
+  - name: user_id
+    type: uuid
+    primary_key: true
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER). PK is also the FK — one row per client-portal login.
+  - name: client_id
+    type: uuid
+    nullable: false
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_client_portal_user_client
+    columns: [client_id]
+foreign_keys:
+  - column: user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: client_id
+    references_table: dsk_client_account
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

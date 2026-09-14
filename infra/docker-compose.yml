@@ -1,0 +1,194 @@
+volumes:
+  pg-data:
+  valkey-data:
+  etc-opzhub:
+  var-lib-opzhub:
+  var-log-opzhub:
+
+networks:
+  opzhub-internal:
+    driver: bridge
+
+services:
+  # One-time host layout (doc 09 §5 step 6). Idempotent — safe to run every
+  # `up`. Default targets named volumes (portable, no real host paths
+  # needed). Prod/EC2: set OPZHUB_ETC_SRC=/etc/opzhub, OPZHUB_VARLIB_SRC=
+  # /var/lib/opzhub, OPZHUB_VARLOG_SRC=/var/log/opzhub in infra/.env to bind
+  # the real host paths already created by infra/ec2-bootstrap.sh instead —
+  # this step then just no-ops against them (see root README "Usage").
+  init:
+    image: debian:bookworm-slim
+    user: "0:0"
+    entrypoint: ["bash", "/wrappers/init-system.sh"]
+    volumes:
+      - ./wrappers:/wrappers:ro
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+      - ${OPZHUB_VARLIB_SRC:-var-lib-opzhub}:/var/lib/opzhub
+      - ${OPZHUB_VARLOG_SRC:-var-log-opzhub}:/var/log/opzhub
+    networks: [opzhub-internal]
+
+  # Self-signed DEV-ONLY public cert, only generated if
+  # /etc/opzhub/certs/public/{fullchain.pem,privkey.pem} are absent (doc 12
+  # covers real CA/mTLS — follow-up). Prod/EC2: place real certs there
+  # (certbot/ACM-issued) before `docker compose up` and this step no-ops.
+  certs:
+    image: alpine:3.20
+    user: "0:0"
+    depends_on:
+      init: { condition: service_completed_successfully }
+    # apk can fail intermittently on Windows/Docker Desktop when mirrors/DNS
+    # are briefly unreachable. Keep errors visible and retry before giving up.
+    # Do not redirect apk output to /dev/null — exit 2 with empty logs is opaque.
+    entrypoint:
+      - sh
+      - -ec
+      - |
+        attempt=1
+        while [ "$$attempt" -le 5 ]; do
+          if apk add --no-cache openssl; then
+            break
+          fi
+          echo "certs: apk add openssl failed (attempt $$attempt/5)" >&2
+          if [ "$$attempt" -eq 5 ]; then
+            echo "certs: giving up — check Docker DNS / Alpine mirror reachability" >&2
+            exit 2
+          fi
+          sleep $$((attempt * 2))
+          attempt=$$((attempt + 1))
+        done
+        sh /dev-certs.sh
+        chown -R 2100:2100 /etc/opzhub/certs
+    volumes:
+      - ./dev-certs.sh:/dev-certs.sh:ro
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+    networks: [opzhub-internal]
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: erp
+      POSTGRES_USER: erp_app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+      - ./postgres-init:/docker-entrypoint-initdb.d:ro
+    networks: [opzhub-internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_app -d erp"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Extra named databases (opzuser/opzmain). postgres's
+  # /docker-entrypoint-initdb.d only runs on a genuinely empty volume; this
+  # one-shot job re-applies the same idempotent SQL on every `up`, so an
+  # existing pg-data volume (and every other machine using these compose
+  # files) still gets the databases before opzhub-be-app starts.
+  postgres-ensure:
+    image: postgres:16
+    depends_on:
+      postgres: { condition: service_healthy }
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+    entrypoint:
+      [
+        "psql",
+        "-h", "postgres",
+        "-U", "erp_app",
+        "-d", "erp",
+        "-v", "ON_ERROR_STOP=1",
+        "-f", "/init/01-create-databases.sql",
+      ]
+    volumes:
+      - ./postgres-init:/init:ro
+    networks: [opzhub-internal]
+
+  valkey:
+    image: valkey/valkey:8
+    command: ["valkey-server", "--requirepass", "${VALKEY_PASSWORD:-devpassword}", "--appendonly", "yes"]
+    volumes:
+      - valkey-data:/data
+    networks: [opzhub-internal]
+    healthcheck:
+      test: ["CMD", "valkey-cli", "-a", "${VALKEY_PASSWORD:-devpassword}", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  opzhub-be-app:
+    build: { context: .., dockerfile: common/backend/Dockerfile }
+    user: "2100:2100"
+    depends_on:
+      postgres: { condition: service_healthy }
+      postgres-ensure: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+      certs: { condition: service_completed_successfully }
+    environment:
+      PLATFORM_CONFIG_PATH: /home/tsuser/opzhub/platform/config/platform.yaml
+      DB_TYPE: postgres
+      DB_POSTGRES_HOST: postgres
+      DB_POSTGRES_PORT: "5432"
+      DB_POSTGRES_DATABASE: erp
+      DB_POSTGRES_USER: erp_app
+      DB_POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-devpassword}
+      OPZHUB_BOOTSTRAP_ADMIN_PASSWORD: ${OPZHUB_BOOTSTRAP_ADMIN_PASSWORD:-}
+      CACHE_TYPE: valkey
+      CACHE_VALKEY_HOST: valkey
+      CACHE_VALKEY_PORT: "6379"
+      CACHE_VALKEY_TLS: "false"
+      CACHE_VALKEY_PASSWORD: ${VALKEY_PASSWORD:-devpassword}
+      BROKER_TYPE: memory
+    volumes:
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+      - ${OPZHUB_VARLIB_SRC:-var-lib-opzhub}:/var/lib/opzhub
+      - ${OPZHUB_VARLOG_SRC:-var-log-opzhub}:/var/log/opzhub
+    networks: [opzhub-internal]
+    expose: ["8114"]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8114/api/v1/opzhub/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  opzhub-web-app:
+    build: { context: .., dockerfile: common/frontend/Dockerfile }
+    user: "2100:2100"
+    volumes:
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+      - ${OPZHUB_VARLIB_SRC:-var-lib-opzhub}:/var/lib/opzhub
+      - ${OPZHUB_VARLOG_SRC:-var-log-opzhub}:/var/log/opzhub
+    networks: [opzhub-internal]
+    expose: ["8109"]
+
+  opzhub-ui-service:
+    build: { context: .., dockerfile: gateway/Dockerfile }
+    user: "2100:2100"
+    depends_on:
+      opzhub-be-app: { condition: service_healthy }
+      opzhub-web-app: { condition: service_started }
+      certs: { condition: service_completed_successfully }
+    ports:
+      - "${OPZHUB_HOST_HTTPS:-8102}:8102"
+    volumes:
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+      - ${OPZHUB_VARLIB_SRC:-var-lib-opzhub}:/var/lib/opzhub
+      - ${OPZHUB_VARLOG_SRC:-var-log-opzhub}:/var/log/opzhub
+    networks: [opzhub-internal]
+
+  # Python core profiles (doc 09 §2.1) — not activated for the kernel-dev pack.
+  # Any AI, OCR, or image profile starts this shared service.
+  opzhub-be-core:
+    profiles: ["ai", "ocr", "image"]
+    build: { context: .., dockerfile: common/python/Dockerfile.api }
+    user: "2100:2100"
+    depends_on:
+      valkey: { condition: service_healthy }
+    environment:
+      PLATFORM_CONFIG_PATH: /home/tsuser/opzhub/platform/config/platform.yaml
+    volumes:
+      - ${OPZHUB_ETC_SRC:-etc-opzhub}:/etc/opzhub
+      - ${OPZHUB_VARLIB_SRC:-var-lib-opzhub}:/var/lib/opzhub
+      - ${OPZHUB_VARLOG_SRC:-var-log-opzhub}:/var/log/opzhub
+    networks: [opzhub-internal]
+    expose: ["8117"]
+

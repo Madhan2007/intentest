@@ -1,0 +1,17 @@
+#!/usr/bin/env python3
+"""opzhubctl kernel data verbs (health/migrate/doctor/module-gen/compose).
+Process verbs (start/stop/status/...) are handled by infra/wrappers/run-opzhubctl.sh;
+that script execs this file for anything else (doc 06 §3)."""
+import os
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_PYTHON_KERNEL = os.path.normpath(os.path.join(_HERE, "..", "python"))
+for path in (_HERE, _PYTHON_KERNEL):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+from opzhub_scripts.cli import main  # noqa: E402
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

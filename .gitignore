@@ -1,0 +1,123 @@
+# Java
+**/target/
+*.class
+*.jar
+!infra/**/*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Node / web
+**/node_modules/
+common/frontend/dist/
+common/frontend/.vite/
+**/dist/
+**/build/
+.npm/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.yarn/cache/
+.pnp.*
+
+# Python
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.venv/
+venv/
+env/
+**/*.egg-info/
+**/*.egg
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+*.cover
+
+# Flutter / Dart
+common/mobile/.dart_tool/
+common/mobile/build/
+common/mobile/.flutter-plugins
+common/mobile/.flutter-plugins-dependencies
+common/mobile/**/ephemeral/
+**/.dart_tool/
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/*.iml
+**/*.ipr
+**/*.iws
+
+# Generated build artifacts (regenerate with opzhubctl module-gen, doc 01 §5)
+# — kept tracked so a fresh clone still boots; do not hand-edit.
+
+# Secrets / local overrides — never commit real values (doc 08 §1, doc 09 §5)
+**/secrets.env
+!**/secrets.env.example
+/etc-opzhub-local/
+infra/.env
+!infra/.env.example
+.env
+.env.*
+!.env.example
+*.env
+!*.env.example
+
+# TLS certificates / keys — never commit private material (doc 12)
+*.pem
+*.key
+*.crt
+*.cer
+*.der
+*.p12
+*.pfx
+*.keystore
+*.jks
+
+# Logs / runtime
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Editor / IDE
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+.agents/
+skills-lock.json
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Archives / temp
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig

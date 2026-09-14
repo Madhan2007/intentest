@@ -1,0 +1,25 @@
+# Build context: repo root (design/). docker build -f common/python/Dockerfile.api .
+# Non-root runtime per doc 15; entrypoint is the already-implemented wrapper.
+FROM python:3.12-slim AS runtime
+RUN groupadd -g 2100 tsuser \
+ && useradd -u 2100 -g 2100 -m -d /home/tsuser -s /usr/sbin/nologin tsuser \
+ && mkdir -p /etc/opzhub/certs/internal /etc/opzhub/certs/public \
+             /var/lib/opzhub/run/svc /var/lib/opzhub/run/locks /var/lib/opzhub/tmp \
+             /var/lib/opzhub/data/staging /var/lib/opzhub/data/web-cache \
+             /var/lib/opzhub/backup/db /var/log/opzhub/jobs /var/log/opzhub/svc \
+ && chown -R tsuser:tsuser /etc/opzhub /var/lib/opzhub /var/log/opzhub /home/tsuser
+
+COPY common/python/pyproject.toml /tmp/pyproject.toml
+RUN pip install --no-cache-dir fastapi "uvicorn[standard]" pyyaml pydantic
+
+USER tsuser
+ENV HOME=/home/tsuser
+WORKDIR /home/tsuser/opzhub
+
+COPY --chown=tsuser:tsuser infra/wrappers ./infra/wrappers
+COPY --chown=tsuser:tsuser platform ./platform
+COPY --chown=tsuser:tsuser common/python ./common/python
+COPY --chown=tsuser:tsuser modules ./modules
+
+ENV PYTHONPATH=/home/tsuser/opzhub/common/python
+ENTRYPOINT ["bash", "infra/wrappers/run-opzhub-be-core.sh"]

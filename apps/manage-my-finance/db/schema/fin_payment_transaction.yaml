@@ -1,0 +1,79 @@
+# fin_payment_transaction — a payment capture attempt against a customer.
+# The reference app's `PaymentTransaction` class is a real @Entity with a
+# real table name ("payment_transactions") and a fully wired controller +
+# repository, but the class body itself declares no field beyond `id` —
+# a third kind of reference-app incompleteness distinct from both "no
+# entity at all" (opz-desk's Problem/Change) and "duplicated entity"
+# (opz-market's four lead shapes): declared, wired, and fieldless. This
+# design fills in the standard field set for a payment-capture record
+# based on the entity's own name/table and standard AR/billing practice.
+entity: fin_payment_transaction
+table: fin_payment_transaction
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: customer_id
+    type: uuid
+    nullable: false
+  - name: payment_method_id
+    type: uuid
+    nullable: true
+  - name: amount
+    type: numeric
+    nullable: false
+  - name: currency
+    type: text
+    nullable: false
+    max_length: 3
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | SUCCEEDED | FAILED | REFUNDED.
+  - name: gateway_reference
+    type: text
+    nullable: true
+    comment: Opaque payment-gateway transaction id, not a card/account number.
+  - name: paid_at
+    type: timestamptz
+    nullable: true
+  - name: failure_reason
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_payment_transaction_company_status
+    columns: [company_id, status]
+  - name: idx_fin_payment_transaction_customer
+    columns: [customer_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: customer_id
+    references_table: fin_customer
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: payment_method_id
+    references_table: fin_customer_payment_method
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

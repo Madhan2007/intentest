@@ -1,0 +1,47 @@
+# mkt_campaign_recipient — a lead's delivery status within one campaign.
+entity: mkt_campaign_recipient
+table: mkt_campaign_recipient
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: campaign_id
+    type: uuid
+    nullable: false
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | SENT | DELIVERED | OPENED | CLICKED | BOUNCED | UNSUBSCRIBED.
+  - name: sent_at
+    type: timestamptz
+    nullable: true
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_campaign_recipient_campaign_lead
+    columns: [campaign_id, lead_id]
+    unique: true
+  - name: idx_mkt_campaign_recipient_lead
+    columns: [lead_id]
+foreign_keys:
+  - column: campaign_id
+    references_table: mkt_campaign
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

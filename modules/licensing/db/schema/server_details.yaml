@@ -1,0 +1,31 @@
+# Server connection registry (OPZMAIN). server_name is the natural key referenced
+# by company_information.server_name.
+#
+# SECURITY NOTE: db_password is stored as plain text — there is no encryption-at-rest
+# or secrets-store integration anywhere in this codebase to reuse yet. Treat this as
+# a known follow-up: encrypt at the application layer before write, or store a
+# reference into a secrets manager here instead of the raw credential.
+entity: server_details
+table: server_details
+version: 1
+database: OPZMAIN
+columns:
+  - name: server_name
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 64
+  - name: db_ip
+    type: text
+    nullable: false
+  - name: db_port
+    type: integer
+    nullable: false
+  - name: db_username
+    type: text
+    nullable: false
+  - name: db_password
+    type: text
+    nullable: false
+indexes: []
+foreign_keys: []

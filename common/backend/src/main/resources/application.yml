@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: opzhub-be-app
+  threads:
+    virtual:
+      enabled: true
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+
+server:
+  port: ${OPZHUB_CORE_PORT:8114}
+  shutdown: graceful
+  # TLS is required in prod (doc 12); dev runs plaintext HTTP so `mvn spring-boot:run`
+  # works without a certificate bundle. A staging/prod overlay enables `server.ssl.*`.
+  ssl:
+    enabled: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    root: INFO

@@ -1,0 +1,84 @@
+# Backup job tracking (OPZMAIN — centralized).
+# Records every backup and restore operation across all company databases.
+entity: backup_job
+table: backup_job
+version: 1
+database: OPZMAIN
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+    comment: >
+      FK to company_information.id. Identifies which company's database
+      this job targets.
+  - name: job_type
+    type: text
+    nullable: false
+    max_length: 16
+    comment: >
+      Target database scope. Allowed values:
+        OPZUSER — backup only the company's opzuser database.
+        OPZHUB  — backup only the company's opzhub database.
+        FULL    — backup both opzuser and opzhub in sequence.
+  - name: status
+    type: text
+    nullable: false
+    default: "'PENDING'"
+    max_length: 16
+    comment: >
+      Current job state. Allowed values:
+        PENDING   — queued, not yet started.
+        RUNNING   — pg_dump in progress.
+        COMPLETED — finished successfully; file_path is set.
+        FAILED    — terminated with error; error_message is set.
+  - name: started_at
+    type: timestamptz
+    nullable: true
+    comment: Timestamp when the pg_dump process actually started.
+  - name: completed_at
+    type: timestamptz
+    nullable: true
+    comment: Timestamp when the job reached COMPLETED or FAILED state.
+  - name: file_path
+    type: text
+    nullable: true
+    comment: >
+      Absolute server-side path to the backup file (e.g.,
+      /var/lib/opzhub/backups/acme/opzuser_20260911_143000.pgdump).
+      Set only on COMPLETED.
+  - name: file_size_bytes
+    type: bigint
+    nullable: true
+    comment: Compressed backup file size in bytes. Set on COMPLETED.
+  - name: error_message
+    type: text
+    nullable: true
+    comment: >
+      Safe, user-visible error summary. Never include DB driver stack
+      traces or connection strings. Set only on FAILED.
+  - name: created_by
+    type: uuid
+    nullable: false
+    comment: User ID (from id_user) who triggered this job.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_backup_job_company_id
+    columns: [company_id]
+  - name: idx_backup_job_status
+    columns: [status]
+  - name: idx_backup_job_created_at
+    columns: [created_at]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

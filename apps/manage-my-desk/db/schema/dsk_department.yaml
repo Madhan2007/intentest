@@ -1,0 +1,49 @@
+# dsk_department — a simple per-company department list (the reference
+# app's TENANT_DEPARTMENT_MASTER). owning_org_unit_id is an OPTIONAL
+# cross-app reference to apps/manage-my-people's ppl_org_unit
+# (OPZPEOPLE) — same "optional sibling app" pattern as
+# dsk_group.owning_org_unit_id in the previous design of this app and
+# mkt_agent_profile.linked_person_id in apps/manage-my-market. Kept as a
+# real, independent table (not forced to require manage-my-people)
+# because the reference evidences it as standalone, lightly-used data.
+entity: dsk_department
+table: dsk_department
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: department_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: description
+    type: text
+    nullable: true
+  - name: owning_org_unit_id
+    type: uuid
+    nullable: true
+    comment: Optional cross-database logical FK to ppl_org_unit.id (OPZPEOPLE, apps/manage-my-people). Only meaningful when that app is installed.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_department_company_name
+    columns: [company_id, department_name]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: owning_org_unit_id
+    references_table: ppl_org_unit
+    references_column: id
+    on_delete: restrict

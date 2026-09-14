@@ -1,0 +1,27 @@
+# License registry (OPZMAIN). license_code is the natural key referenced by
+# company_information.license_code.
+entity: company_license
+table: company_license
+version: 1
+database: OPZMAIN
+columns:
+  - name: license_code
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 64
+  # Interpreted as a Unix epoch (seconds) timestamp per "epoch format" — if the
+  # intent was a calendar date instead, change type to `date`.
+  - name: license_expiry_epoch
+    type: bigint
+    nullable: false
+  # Path / object-storage reference to the license file, not inline binary.
+  - name: license_file
+    type: text
+    nullable: true
+  # Flexible license metadata (JSON object).
+  - name: license_details
+    type: jsonb
+    nullable: true
+indexes: []
+foreign_keys: []

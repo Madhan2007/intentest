@@ -1,0 +1,35 @@
+# ppl_holiday_calendar_day — one holiday date within a calendar.
+entity: ppl_holiday_calendar_day
+table: ppl_holiday_calendar_day
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: calendar_id
+    type: uuid
+    nullable: false
+  - name: holiday_date
+    type: date
+    nullable: false
+  - name: holiday_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: is_optional
+    type: boolean
+    nullable: false
+    default: "false"
+indexes:
+  - name: idx_ppl_holiday_calendar_day_calendar_date
+    columns: [calendar_id, holiday_date]
+    unique: true
+foreign_keys:
+  - column: calendar_id
+    references_table: ppl_holiday_calendar
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

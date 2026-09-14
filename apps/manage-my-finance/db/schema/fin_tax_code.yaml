@@ -1,0 +1,56 @@
+# fin_tax_code — company-configurable tax classification catalog.
+# Replaces the reference app's HsnSacCache, which is hardcoded to India's
+# HSN/SAC GST classification scheme with a gst_rate column name and no
+# company scope at all (a global cache, not company data). A company
+# outside India configures its own tax code scheme here — VAT rates, US
+# sales-tax codes, or HSN/SAC if that is what applies to them — the same
+# "company-managed taxonomy instead of a hardcoded scheme" fix already
+# applied to dat_category/dat_location (apps/manage-my-data).
+entity: fin_tax_code
+table: fin_tax_code
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: code
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Company-defined code, e.g. an HSN/SAC code, a VAT category, or a US sales-tax jurisdiction code.
+  - name: description
+    type: text
+    nullable: true
+  - name: tax_rate
+    type: numeric
+    nullable: false
+    comment: Percentage.
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_tax_code_company_code
+    columns: [company_id, code]
+    unique: true
+  - name: idx_fin_tax_code_company_active
+    columns: [company_id, is_active]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

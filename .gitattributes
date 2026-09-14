@@ -1,0 +1,6 @@
+# Force LF for anything executed as a script inside Linux containers/hosts,
+# regardless of local core.autocrlf (doc 15 non-root wrappers must stay LF).
+*.sh text eol=lf
+infra/wrappers/system/* text eol=lf
+Dockerfile text eol=lf
+*.dockerignore text eol=lf

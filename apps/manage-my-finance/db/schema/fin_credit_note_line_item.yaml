@@ -1,0 +1,40 @@
+# fin_credit_note_line_item — one line on a credit note.
+entity: fin_credit_note_line_item
+table: fin_credit_note_line_item
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: credit_note_id
+    type: uuid
+    nullable: false
+  - name: description
+    type: text
+    nullable: false
+  - name: quantity
+    type: integer
+    nullable: false
+    default: "1"
+  - name: unit_amount
+    type: numeric
+    nullable: false
+  - name: amount
+    type: numeric
+    nullable: false
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_credit_note_line_item_credit_note
+    columns: [credit_note_id]
+foreign_keys:
+  - column: credit_note_id
+    references_table: fin_credit_note
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

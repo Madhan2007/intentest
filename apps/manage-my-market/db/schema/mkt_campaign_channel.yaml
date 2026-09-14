@@ -1,0 +1,43 @@
+# mkt_campaign_channel — per-channel budget/spend allocation within a
+# campaign (was `DigitalChannel` in the reference app; renamed since it
+# is channel-within-campaign data, not a standalone "digital channel"
+# concept).
+entity: mkt_campaign_channel
+table: mkt_campaign_channel
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: campaign_id
+    type: uuid
+    nullable: false
+  - name: channel_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: EMAIL | SMS | SOCIAL | SEARCH_ADS | DISPLAY_ADS | CUSTOM.
+  - name: budget
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: spend
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_campaign_channel_campaign
+    columns: [campaign_id]
+foreign_keys:
+  - column: campaign_id
+    references_table: mkt_campaign
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

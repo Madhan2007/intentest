@@ -1,0 +1,61 @@
+# Maintenance window registry (OPZMAIN — centralized).
+# A row with is_active=true puts the application (or a single company) into
+# maintenance mode; non-admin requests receive HTTP 503 until deactivated.
+entity: maintenance_window
+table: maintenance_window
+version: 1
+database: OPZMAIN
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: true
+    comment: >
+      When null this window applies platform-wide (all companies).
+      When set it scopes the window to that single company only.
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+    comment: >
+      True while maintenance is in effect. Set to false (not deleted) when
+      the window is ended so the history is preserved.
+  - name: reason
+    type: text
+    nullable: true
+    max_length: 500
+    comment: Human-readable message shown to users during maintenance.
+  - name: starts_at
+    type: timestamptz
+    nullable: false
+    default: now()
+    comment: When the maintenance window became (or will become) active.
+  - name: ends_at
+    type: timestamptz
+    nullable: true
+    comment: >
+      Planned end time. Null means open-ended (must be deactivated manually).
+  - name: created_by
+    type: uuid
+    nullable: false
+    comment: Super-admin user ID who created this window.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_maintenance_window_active
+    columns: [is_active, company_id]
+    comment: Fast lookup for the MaintenanceFilter cache warm-up.
+  - name: idx_maintenance_window_company_id
+    columns: [company_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

@@ -1,0 +1,43 @@
+# Single-row marker (OPZMAIN): which product THIS deployment was built
+# and packaged for. Seeded automatically at every startup from
+# platform/config/product.yaml (written once by
+# infra/wrappers/package-product.sh) — never from a runtime argument
+# (doc 35 §3.5). Exactly one row ever exists, keyed by the fixed literal
+# singleton_key = 'default'.
+#
+# See also company_active_product.yaml (OPZHUB) — the same marker,
+# duplicated into the per-company database so a COMPANY_BE deployment
+# (doc 25 §3.3) can answer "which product am I" without reaching OPZMAIN.
+entity: platform_product
+table: platform_product
+version: 1
+database: OPZMAIN
+columns:
+  - name: singleton_key
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 16
+    comment: Always the literal value "default" — guarantees exactly one row.
+
+  - name: product_key
+    type: text
+    nullable: false
+    max_length: 64
+    comment: >
+      FK to product_catalog.product_key. The product this deployment was
+      packaged for (platform/config/product.yaml at boot time).
+
+  - name: activated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+
+indexes: []
+
+foreign_keys:
+  - column: product_key
+    references_table: product_catalog
+    references_column: product_key
+    on_delete: restrict
+    enforce: postgres

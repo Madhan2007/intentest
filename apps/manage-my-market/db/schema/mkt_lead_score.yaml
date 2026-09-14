@@ -1,0 +1,29 @@
+# mkt_lead_score — one-to-one computed engagement/quality score per lead.
+entity: mkt_lead_score
+table: mkt_lead_score
+version: 1
+database: OPZMARKET
+columns:
+  - name: lead_id
+    type: uuid
+    primary_key: true
+    nullable: false
+    comment: 1:1 with mkt_lead — PK is also the FK.
+  - name: score
+    type: integer
+    nullable: false
+    default: "0"
+  - name: breakdown_json
+    type: jsonb
+    nullable: true
+    comment: Structured score-factor breakdown, e.g. {"email_opens":10,"page_visits":25}.
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+foreign_keys:
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

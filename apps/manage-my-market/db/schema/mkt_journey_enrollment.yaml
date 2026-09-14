@@ -1,0 +1,50 @@
+# mkt_journey_enrollment — a lead's live position within one journey.
+entity: mkt_journey_enrollment
+table: mkt_journey_enrollment
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: journey_id
+    type: uuid
+    nullable: false
+  - name: lead_id
+    type: uuid
+    nullable: false
+  - name: current_node_id
+    type: text
+    nullable: true
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: ACTIVE | COMPLETED | EXITED.
+  - name: enrolled_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_journey_enrollment_journey_lead
+    columns: [journey_id, lead_id]
+  - name: idx_mkt_journey_enrollment_status
+    columns: [status]
+foreign_keys:
+  - column: journey_id
+    references_table: mkt_journey
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: lead_id
+    references_table: mkt_lead
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

@@ -1,0 +1,42 @@
+# dsk_team_member — agent membership in a team. Fixes a real bug in the
+# reference app: TEAM_MEMBERS stores MEMBER_NAME as free text with no
+# foreign key to AUTH_USER_MASTER at all — a member and a login user were
+# never actually linked. This design references agent_user_id, a
+# cross-database logical FK to id_user.id (OPZUSER).
+entity: dsk_team_member
+table: dsk_team_member
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: team_id
+    type: uuid
+    nullable: false
+  - name: agent_user_id
+    type: uuid
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: added_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_team_member_team_agent
+    columns: [team_id, agent_user_id]
+    unique: true
+  - name: idx_dsk_team_member_agent
+    columns: [agent_user_id]
+foreign_keys:
+  - column: team_id
+    references_table: dsk_team
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

@@ -1,0 +1,41 @@
+# ppl_leave_policy_assignment — which ppl_org_unit a leave policy applies
+# to. Now a same-database, Postgres-enforced FK (both tables live on
+# OPZPEOPLE) — this was a cross-database reference when drafted under a
+# separate apps/manage-my-hr wrapper app.
+entity: ppl_leave_policy_assignment
+table: ppl_leave_policy_assignment
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: leave_policy_id
+    type: uuid
+    nullable: false
+  - name: applies_to_org_unit_id
+    type: uuid
+    nullable: true
+    comment: Null = applies company-wide.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_leave_policy_assignment_policy
+    columns: [leave_policy_id]
+  - name: idx_ppl_leave_policy_assignment_org_unit
+    columns: [applies_to_org_unit_id]
+foreign_keys:
+  - column: leave_policy_id
+    references_table: ppl_leave_policy
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: applies_to_org_unit_id
+    references_table: ppl_org_unit
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

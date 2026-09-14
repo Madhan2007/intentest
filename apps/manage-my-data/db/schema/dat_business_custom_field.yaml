@@ -1,0 +1,53 @@
+# dat_business_custom_field — EAV value store for per-company, per-category
+# custom fields on a business record. Definitions live in
+# id_field_definition (form_id "manage-my-data.business.custom"), not
+# duplicated here — same pattern as apps/manage-my-people's
+# ppl_person_custom_field and apps/manage-my-desk's
+# dsk_ticket_custom_field. This table stores VALUES only.
+entity: dat_business_custom_field
+table: dat_business_custom_field
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: business_id
+    type: uuid
+    nullable: false
+  - name: field_key
+    type: text
+    nullable: false
+    max_length: 64
+    comment: Matches id_field_definition.field_key for form_id "manage-my-data.business.custom".
+  - name: field_value
+    type: text
+    nullable: true
+  - name: field_group
+    type: text
+    nullable: true
+    max_length: 64
+  - name: display_order
+    type: integer
+    nullable: false
+    default: "0"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_business_custom_field_business_key
+    columns: [business_id, field_key]
+    unique: true
+foreign_keys:
+  - column: business_id
+    references_table: dat_business
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

@@ -1,0 +1,61 @@
+# dat_location — generic, self-referencing geographic hierarchy
+# (country -> state -> city -> area). Replaces the reference app's three
+# flat text columns (state, city, area) that defaulted to
+# "Delhi"/"Connaught Place" when unset — a hardcoded, India-only,
+# non-tenant-aware design. Same generalize-via-discriminator technique as
+# dat_category / ppl_org_unit.
+entity: dat_location
+table: dat_location
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: location_type
+    type: text
+    nullable: false
+    max_length: 16
+    comment: >
+      Allowed values governed by id_field_definition. COUNTRY | STATE |
+      CITY | AREA | CUSTOM.
+  - name: parent_location_id
+    type: uuid
+    nullable: true
+  - name: location_code
+    type: text
+    nullable: false
+    max_length: 48
+  - name: location_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_location_company_type_code
+    columns: [company_id, location_type, location_code]
+    unique: true
+  - name: idx_dat_location_company_parent
+    columns: [company_id, parent_location_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: parent_location_id
+    references_table: dat_location
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

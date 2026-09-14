@@ -1,0 +1,7 @@
+# db.type / cache.type / broker.type overrides for this customer pack (doc 08 §1)
+db:
+  type: postgres
+cache:
+  type: valkey
+broker:
+  type: valkey

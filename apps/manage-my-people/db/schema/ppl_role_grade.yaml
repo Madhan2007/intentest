@@ -1,0 +1,57 @@
+# ppl_role_grade — generic role/grade/band/employment-type catalog.
+# Replaces the reference app's four separate tables (Designation, Grade,
+# Band, EmploymentType) with one table keyed by `grade_type`. Same
+# rationale as ppl_org_unit.yaml.
+entity: ppl_role_grade
+table: ppl_role_grade
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: grade_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: >
+      Allowed values governed by id_field_definition. Starting set:
+      DESIGNATION | GRADE | BAND | EMPLOYMENT_TYPE | PROGRAM_LEVEL | CUSTOM.
+  - name: grade_code
+    type: text
+    nullable: false
+    max_length: 32
+  - name: grade_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: rank_order
+    type: integer
+    nullable: true
+    comment: Ascending seniority/level order within the same grade_type, for sort and comparisons.
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_role_grade_company_type_code
+    columns: [company_id, grade_type, grade_code]
+    unique: true
+  - name: idx_ppl_role_grade_company_type
+    columns: [company_id, grade_type]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. App-enforced at write time (doc 28 §3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

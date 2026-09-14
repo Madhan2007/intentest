@@ -1,0 +1,58 @@
+# Product catalog index — single authoritative source for:
+#   1. product_catalog seed (OPZMAIN)          — ProductCatalogSeed
+#   2. application_catalog.product_key backfill (OPZHUB) — ApplicationCatalogSeed
+#   3. packaging/build filtering               — infra/wrappers/package-product.sh
+#
+# Every app under apps/<id>/ must be listed under exactly one product's
+# "apps:" list. An app not listed here keeps product_key = NULL and is
+# excluded from every product-scoped package build.
+#
+# Add a new product = add one block below. No code change required to
+# add a product; the packaging script and both seeds read this file only.
+schema_version: "2026.1"
+
+products:
+  - product_key: managemyopz
+    product_name: ManageMyOpz
+    description: >
+      Multi-company operations suite — data, desk, HR, market, finance,
+      sales, inventory, shop, project, and vault management.
+    logo_uri: /branding/products/managemyopz/logo.svg
+    icon_key: managemyopz
+    status: active
+    apps:
+      - manage-my-data
+      - manage-my-desk
+      - manage-my-hr
+      - manage-my-people
+      - manage-my-market
+      - manage-my-finance
+      - manage-my-sales
+      - manage-my-inventory
+      - manage-my-shop
+      - manage-my-project
+      - manage-my-vault
+
+  # Placeholder — planned product, no apps/ folders exist for it yet.
+  # Packaging refuses to build this product until at least one listed
+  # app_key has a folder under apps/.
+  - product_key: managemyid
+    product_name: ManageMyID
+    description: >
+      Identity and credential management product (planned). Placeholder
+      entry only — no apps/ folders implemented yet.
+    logo_uri: /branding/products/managemyid/logo.svg
+    icon_key: managemyid
+    status: active
+    apps: []
+
+  # Placeholder — planned product, no apps/ folders exist for it yet.
+  - product_key: smartaicampus
+    product_name: SmartAI Campus
+    description: >
+      Campus/education management product (planned). Placeholder entry
+      only — no apps/ folders implemented yet.
+    logo_uri: /branding/products/smartaicampus/logo.svg
+    icon_key: smartaicampus
+    status: active
+    apps: []

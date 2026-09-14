@@ -1,0 +1,168 @@
+# dat_business — a business/data record managed through the intake ->
+# verification -> publish workflow. The reference app (opz-data, a
+# "Yellow Pages" directory prototype) has no company_id at all (single
+# global table, no multi-tenancy) and hardcodes state/city/area to Delhi
+# defaults; this design adds tenant scope and normalizes location into
+# dat_location. No local User/StaffUser table: marketing-manager,
+# call-agent, owner, and creator are all cross-database logical
+# references to id_user.id (OPZUSER) — the reference's own `User` and
+# `StaffUser` entities duplicating platform identity is the exact
+# anti-pattern doc 28 exists to prevent.
+entity: dat_business
+table: dat_business
+version: 1
+database: OPZDATA
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: record_code
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via dat_record_code_sequence.
+  - name: business_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: category_id
+    type: uuid
+    nullable: true
+    comment: FK -> dat_category.id. The reference app's category list was a hardcoded frontend array; here it is company-managed data.
+  - name: business_type
+    type: text
+    nullable: false
+    max_length: 24
+    default: "'SERVICE_PROVIDER'"
+    comment: SERVICE_PROVIDER | MANUFACTURER_SUPPLIER.
+  - name: phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: website
+    type: text
+    nullable: true
+  - name: address_line
+    type: text
+    nullable: true
+  - name: location_id
+    type: uuid
+    nullable: true
+    comment: FK -> dat_location.id. Replaces the reference's flat state/city/area text columns (which defaulted to "Delhi"/"Connaught Place" when unset).
+  - name: description
+    type: text
+    nullable: true
+  - name: rating_average
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: >
+      Maintained aggregate (2 decimal places), recomputed by
+      BusinessReviewService in the same transaction as a published
+      review insert/update — not computed per request. Source of truth
+      is still dat_business_review rows; this column is a read
+      optimization for directory list/search pages.
+  - name: reviews_count
+    type: integer
+    nullable: false
+    default: "0"
+    comment: Maintained counter, same rationale as rating_average.
+  - name: stage
+    type: text
+    nullable: false
+    max_length: 32
+    default: "'LEAD_CREATED'"
+    comment: >
+      Allowed values governed by id_field_definition. Canonical flow:
+      LEAD_CREATED -> ASSIGNED_MARKETING_MANAGER -> ASSIGNED_CALL_USER ->
+      BUSINESS_CONTACTED -> DETAILS_COLLECTED -> PROFILE_CREATED ->
+      VERIFIED_MANAGER -> APPROVED_ADMIN -> PUBLISHED, with UNPUBLISHED
+      and ARCHIVED as operational exits (not in the reference app, added
+      here because a directory needs a way to take a listing down).
+  - name: assigned_marketing_manager_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: assigned_call_agent_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: owner_user_id
+    type: uuid
+    nullable: true
+    comment: >
+      The external business-owner login (role business_owner) who claims
+      and self-manages this listing. Present in the reference app's role
+      model but never actually wired to a column on `businesses` —
+      added here as a real, optional field.
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dat_business_company_code
+    columns: [company_id, record_code]
+    unique: true
+  - name: idx_dat_business_company_stage
+    columns: [company_id, stage]
+  - name: idx_dat_business_category
+    columns: [category_id]
+  - name: idx_dat_business_location
+    columns: [location_id]
+  - name: idx_dat_business_mm
+    columns: [assigned_marketing_manager_user_id]
+  - name: idx_dat_business_call_agent
+    columns: [assigned_call_agent_user_id]
+  - name: idx_dat_business_owner
+    columns: [owner_user_id]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: category_id
+    references_table: dat_category
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: location_id
+    references_table: dat_location
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  # Cross-database: id_user lives on OPZUSER (always present — identity is
+  # a shared module). App-enforced (doc 28 S3).
+  - column: assigned_marketing_manager_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: assigned_call_agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: owner_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

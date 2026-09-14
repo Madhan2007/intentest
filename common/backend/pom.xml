@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ManageMyOpz Java kernel (opzhub-be-app). Package layout: doc 04.
+  Feature module Java sources physically live under modules/<id>/backend/src/main/java
+  and are added as extra compile/resource roots below (build-helper-maven-plugin) so the
+  canonical plug-and-play folder layout (doc 02 §8) is preserved without a multi-module
+  Maven reactor. When a module folder is added/removed, tools/module-gen must regenerate
+  this list (see the "GENERATED MODULE SOURCE ROOTS" markers).
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.3.4</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.managemyopz</groupId>
+  <artifactId>opzhub-be-app</artifactId>
+  <version>0.0.0-dev</version>
+  <packaging>jar</packaging>
+  <name>opzhub-be-app</name>
+  <description>ManageMyOpz Java ERP kernel (Spring Boot)</description>
+
+  <properties>
+    <java.version>21</java.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-jdbc</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.lettuce</groupId>
+      <artifactId>lettuce-core</artifactId>
+      <version>6.3.2.RELEASE</version>
+    </dependency>
+    <dependency>
+      <!-- Required by Spring Security's Argon2PasswordEncoder (doc 18 §2.1) -->
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk18on</artifactId>
+      <version>1.78.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.security</groupId>
+      <artifactId>spring-security-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <finalName>opzhub-be-app</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>3.6.0</version>
+        <executions>
+          <!-- GENERATED MODULE SOURCE ROOTS: begin (tools/module-gen regenerates) -->
+          <execution>
+            <id>add-module-sources</id>
+            <phase>generate-sources</phase>
+            <goals><goal>add-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>../../modules/identity/backend/src/main/java</source>
+                <source>../../modules/admin/backend/src/main/java</source>
+                <source>../../modules/crud/backend/src/main/java</source>
+                <source>../../modules/apps/backend/src/main/java</source>
+              </sources>
+            </configuration>
+          </execution>
+          <execution>
+            <id>add-module-resources</id>
+            <phase>generate-resources</phase>
+            <goals><goal>add-resource</goal></goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>../../modules/identity</directory>
+                  <targetPath>modules/identity</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/commands/**/*.sql</include>
+                    <include>db/schema/**/*.yaml</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>../../modules/admin</directory>
+                  <targetPath>modules/admin</targetPath>
+                  <includes><include>module.yaml</include></includes>
+                </resource>
+                <resource>
+                  <directory>../../modules/crud</directory>
+                  <targetPath>modules/crud</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/schema/**/*.yaml</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>../../modules/licensing</directory>
+                  <targetPath>modules/licensing</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/schema/**/*.yaml</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>../../modules/apps</directory>
+                  <targetPath>modules/apps</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/schema/**/*.yaml</include>
+                    <include>db/seed/**/*.yaml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <!-- GENERATED MODULE SOURCE ROOTS: end -->
+          <!-- Not module-owned: platform/catalog is the vendor-wide product/app
+               index (doc 35), read by ProductCatalogSeed and ApplicationCatalogSeed.
+               Kept as its own execution so module-gen regeneration above never
+               touches it. -->
+          <execution>
+            <id>add-platform-catalog-resources</id>
+            <phase>generate-resources</phase>
+            <goals><goal>add-resource</goal></goals>
+            <configuration>
+              <resources>
+                <resource>
+                  <directory>../../platform/catalog</directory>
+                  <targetPath>platform/catalog</targetPath>
+                  <includes>
+                    <include>*.yaml</include>
+                  </includes>
+                </resource>
+              </resources>
+            </configuration>
+          </execution>
+          <!-- crud is the first module shipping tests under its own folder;
+               add its test source root so Surefire actually compiles and runs them. -->
+          <execution>
+            <id>add-module-test-sources</id>
+            <phase>generate-test-sources</phase>
+            <goals><goal>add-test-source</goal></goals>
+            <configuration>
+              <sources>
+                <source>../../modules/crud/backend/src/test/java</source>
+                <source>../../modules/identity/backend/src/test/java</source>
+                <source>../../modules/apps/backend/src/test/java</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+</project>

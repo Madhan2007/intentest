@@ -1,0 +1,199 @@
+# dsk_ticket — core ticket record, including the reference app's most
+# distinctive real feature: a commercial-clearance gate. Work on a
+# ticket does not start until EITHER the client has paid the required
+# advance percentage of the estimated amount, OR the client has approved
+# credit terms (dsk_client_account.is_credit_approved) with a computed
+# credit due date. No local User/Role table: reporter/assignee/affected
+# user/approver are all cross-database logical references to id_user.id
+# (OPZUSER) — including external client-portal logins, distinguished
+# from internal staff only by an optional dsk_client_portal_user row,
+# never by a local user_type column.
+entity: dsk_ticket
+table: dsk_ticket
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_number
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via dsk_ticket_code_sequence.
+  - name: client_id
+    type: uuid
+    nullable: false
+  - name: reporter_user_id
+    type: uuid
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER). May be internal staff or a dsk_client_portal_user login.
+  - name: assignee_user_id
+    type: uuid
+    nullable: true
+  - name: affected_user_id
+    type: uuid
+    nullable: true
+    comment: "\"On behalf of\" — cross-database logical FK to id_user.id (OPZUSER)."
+  - name: title
+    type: text
+    nullable: false
+    max_length: 250
+  - name: description
+    type: text
+    nullable: false
+  - name: category_id
+    type: uuid
+    nullable: true
+    comment: FK -> dsk_category.id. The reference app instead stored a free-text CATEGORY string defaulted to a category's own name — a real foreign key here instead.
+  - name: mode_of_enquiry
+    type: text
+    nullable: false
+    max_length: 20
+    default: "'DIRECT'"
+    comment: DIRECT | EMAIL | PHONE | WALK_IN | PORTAL.
+  - name: priority
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'MEDIUM'"
+    comment: LOW | MEDIUM | HIGH | CRITICAL.
+  - name: severity
+    type: text
+    nullable: false
+    max_length: 8
+    default: "'SEV_3'"
+    comment: SEV_1 | SEV_2 | SEV_3 | SEV_4.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 24
+    default: "'NEW'"
+    comment: NEW | IN_PROGRESS | PENDING | ON_HOLD | RESOLVED | CLOSED | CANCELLED.
+  - name: pending_reason
+    type: text
+    nullable: true
+  - name: estimated_amount
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: advance_percentage
+    type: numeric
+    nullable: false
+    default: "50"
+  - name: advance_paid_amount
+    type: numeric
+    nullable: false
+    default: "0"
+    comment: Maintained from dsk_payment_transaction rows with status VERIFIED — never client-writable.
+  - name: payment_mode
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ADVANCE'"
+    comment: ADVANCE | CREDIT.
+  - name: credit_period_days
+    type: integer
+    nullable: true
+  - name: credit_due_at
+    type: date
+    nullable: true
+    comment: Set when payment_mode = CREDIT, computed as ticket creation date + credit_period_days.
+  - name: is_credit_overdue
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: is_commercial_cleared
+    type: boolean
+    nullable: false
+    default: "false"
+    comment: >
+      True once advance_paid_amount >= estimated_amount * advance_percentage
+      / 100 (ADVANCE mode) or the client's credit approval covers this
+      ticket (CREDIT mode). Maintained by the service layer, not
+      client-writable — work should not begin while false.
+  - name: sla_policy_id
+    type: uuid
+    nullable: true
+  - name: sla_due_at
+    type: timestamptz
+    nullable: true
+  - name: sla_status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'NOT_STARTED'"
+    comment: NOT_STARTED | RUNNING | PAUSED | MET | BREACHED.
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_company_number
+    columns: [company_id, ticket_number]
+    unique: true
+  - name: idx_dsk_ticket_company_status
+    columns: [company_id, status]
+  - name: idx_dsk_ticket_client
+    columns: [client_id]
+  - name: idx_dsk_ticket_assignee
+    columns: [assignee_user_id]
+  - name: idx_dsk_ticket_category
+    columns: [category_id]
+  - name: idx_dsk_ticket_sla_policy
+    columns: [sla_policy_id]
+  - name: idx_dsk_ticket_credit_due
+    columns: [credit_due_at]
+  - name: idx_dsk_ticket_mode_of_enquiry
+    columns: [mode_of_enquiry]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: client_id
+    references_table: dsk_client_account
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: category_id
+    references_table: dsk_category
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: sla_policy_id
+    references_table: dsk_sla_policy
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  # Cross-database: id_user lives on OPZUSER (always present — identity is
+  # a shared module). App-enforced (doc 28 S3).
+  - column: reporter_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: assignee_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: affected_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

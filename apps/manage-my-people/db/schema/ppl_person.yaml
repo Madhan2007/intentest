@@ -1,0 +1,205 @@
+# ppl_person — core person master (generalized "employee" record).
+# "Employee" is intentionally not used anywhere in this app: `category`
+# lets the same physical table serve manage-my-people itself plus future
+# wrapper apps (manage-my-hra, manage-my-students, ...) without a schema
+# fork. See design/docs/architecture/27-people-domain-design.md and
+# design/docs/requirement/manage-my-people.md for the full design.
+#
+# Lifecycle is modeled as a single `status` enum (see comment below) instead
+# of a separate soft-delete flag — ARCHIVED already means "no longer active,
+# kept for history", so a parallel `deleted` column would just duplicate it.
+entity: ppl_person
+table: ppl_person
+version: 1
+database: OPZPEOPLE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+    comment: Tenant scope. FK -> company_information.id.
+  - name: person_code
+    type: text
+    nullable: false
+    max_length: 32
+    comment: >
+      Human-readable code, unique per company. Generated from
+      ppl_person_code_sequence; never reused after archive.
+  - name: category
+    type: text
+    nullable: false
+    max_length: 24
+    default: "'employee'"
+    comment: >
+      What kind of person this row represents. Allowed values are governed
+      by id_field_definition (form_id "manage-my-people.person.create"),
+      not hardcoded here. Starting set: employee | student | member |
+      contractor | custom. Wrapper apps add their own category value
+      without changing this table.
+  - name: first_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: middle_name
+    type: text
+    nullable: true
+    max_length: 100
+  - name: last_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: display_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: date_of_birth
+    type: date
+    nullable: true
+  - name: gender
+    type: text
+    nullable: true
+    max_length: 24
+  - name: nationality
+    type: text
+    nullable: true
+    max_length: 100
+  - name: marital_status
+    type: text
+    nullable: true
+    max_length: 24
+  - name: blood_group
+    type: text
+    nullable: true
+    max_length: 8
+  - name: preferred_language
+    type: text
+    nullable: true
+    max_length: 10
+    comment: ISO 639-1 code. Same convention as user_settings.preferred_language.
+  - name: avatar_url
+    type: text
+    nullable: true
+  - name: work_email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: personal_email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: work_phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: personal_phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: current_address
+    type: text
+    nullable: true
+  - name: permanent_address
+    type: text
+    nullable: true
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: >
+      Lifecycle state. Allowed: ACTIVE | ON_HOLD | ON_LEAVE | SUSPENDED |
+      EXITED | ARCHIVED. ARCHIVED is the soft-delete equivalent — rows are
+      never hard-deleted once they have child records (documents, timeline).
+  - name: joined_on
+    type: date
+    nullable: true
+    comment: Generalized "date of joining" — admission date, enrollment date, etc.
+  - name: confirmed_on
+    type: date
+    nullable: true
+    comment: Generalized "confirmation date" (end of probation/trial).
+  - name: probation_end_date
+    type: date
+    nullable: true
+  - name: notice_period_days
+    type: integer
+    nullable: true
+  - name: exit_date
+    type: date
+    nullable: true
+  - name: exit_reason
+    type: text
+    nullable: true
+  - name: manager_person_id
+    type: uuid
+    nullable: true
+    comment: >
+      Self-referencing primary reporting line. Secondary relations
+      (skip-manager, mentor, buddy, HRBP) live in ppl_person_affiliation,
+      not as extra columns here.
+  - name: linked_user_id
+    type: uuid
+    nullable: true
+    comment: >
+      Optional cross-database logical link to id_user.id (OPZUSER) — this
+      person is indirectly connected to a login account. Not every person
+      has one (contractors, students, HRA members may never log in) and
+      not every login user has a person row. Resolved live via a
+      cross-app DataClient lookup against identity's registered commands
+      (doc 28 S3), never a copied/duplicated identity snapshot. Whether
+      name/email are pulled FROM the linked account or stay independent
+      is a per-company choice in ppl_company_setting.identity_sync_mode —
+      linking and syncing are separate decisions.
+  - name: created_by
+    type: uuid
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_by
+    type: uuid
+    nullable: true
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_company_code
+    columns: [company_id, person_code]
+    unique: true
+  - name: idx_ppl_person_company_work_email
+    columns: [company_id, work_email]
+    unique: true
+  - name: idx_ppl_person_company_status
+    columns: [company_id, status]
+  - name: idx_ppl_person_company_category
+    columns: [company_id, category]
+  - name: idx_ppl_person_manager
+    columns: [manager_person_id]
+  - name: idx_ppl_person_linked_user
+    columns: [linked_user_id]
+    unique: true
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN, this table on
+  # OPZPEOPLE. Postgres cannot create that constraint; the kernel enforces
+  # it at write time (APP) per doc 28 §3.
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: manager_person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  # Cross-database: id_user lives on OPZUSER. Same app-enforced pattern as
+  # company_id above. Nullable and optional — see column comment.
+  - column: linked_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

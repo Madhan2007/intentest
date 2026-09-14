@@ -1,0 +1,64 @@
+# dsk_timesheet_entry — per-ticket, per-day logged work minutes. Matches
+# the reference app's ACTIVITY_TIMESHEET_MASTER.
+entity: dsk_timesheet_entry
+table: dsk_timesheet_entry
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: agent_user_id
+    type: uuid
+    nullable: false
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: work_date
+    type: date
+    nullable: false
+  - name: logged_minutes
+    type: integer
+    nullable: false
+    default: "0"
+  - name: description
+    type: text
+    nullable: true
+  - name: is_auto_logged
+    type: boolean
+    nullable: false
+    default: "true"
+    comment: True when derived from dsk_activity_screenshot capture intervals; false when manually entered.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_timesheet_entry_agent_date
+    columns: [agent_user_id, work_date]
+  - name: idx_dsk_timesheet_entry_ticket
+    columns: [ticket_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: agent_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

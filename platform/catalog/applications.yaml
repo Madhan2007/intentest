@@ -1,0 +1,43 @@
+# Vendor application catalog index. This is NOT a default install list.
+# Customer packs copy only solution.manifest.yaml enabled ∪ requires.
+# SPDX-License-Identifier: Apache-2.0
+schema_version: "2026.1"
+
+shared:
+  - id: identity
+    title: Users, roles, sessions
+  - id: admin
+    title: Solution settings
+  - id: notifications
+    title: In-app and WebSocket events
+  - id: mail
+    title: Email send and receive
+  - id: master-data
+    title: Party, item, UOM, currency, tax
+  - id: documents
+    title: Files and metadata
+  - id: reporting
+    title: Operational reports
+
+# Sold applications (50+). Add a folder under modules/<id>/ for each new row.
+# Packaging must not copy this entire list.
+applications:
+  - id: hr
+    title: Human resources
+    requires: [identity, admin]
+  - id: ticketing
+    title: Ticketing / ITSM
+    requires: [identity, admin]
+  - id: ledger
+    title: Multi-currency books
+    requires: [identity, admin, master-data]
+  - id: inventory
+    title: Stock tables
+    requires: [identity, admin, master-data]
+  - id: ocr
+    title: Document OCR
+    requires: [identity, documents, notifications]
+  - id: image-processing
+    title: Image clean / deskew
+    requires: [identity, documents]
+  # … remaining catalog entries (payroll, assets, CRM, …) — one id per folder

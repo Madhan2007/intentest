@@ -1,0 +1,40 @@
+# dsk_ticket_code_sequence — per-company, per-prefix atomic counter for
+# dsk_ticket.ticket_number. The reference app's TICKET_HEADER.TICKET_NUMBER
+# is just a VARCHAR with a uniqueness constraint and no visible generator
+# — this design adds the same atomic UPDATE...RETURNING sequence table
+# used by every other apps/manage-my-* app this session.
+entity: dsk_ticket_code_sequence
+table: dsk_ticket_code_sequence
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: prefix
+    type: text
+    nullable: false
+    max_length: 16
+    default: "''"
+  - name: next_number
+    type: bigint
+    nullable: false
+    default: "1"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_code_sequence_company_prefix
+    columns: [company_id, prefix]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

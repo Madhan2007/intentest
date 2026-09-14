@@ -1,0 +1,69 @@
+# Public gateway — Nginx template (doc 09 §4). This pass terminates TLS at
+# this hop only; internal upstreams (opzhub-be-app, opzhub-web-app) are plaintext on the
+# isolated `opzhub-internal` Docker network. Full internal mTLS (doc 12) is a
+# documented follow-up once ai/ocr profiles and Valkey are packed.
+worker_processes auto;
+events {
+  worker_connections 1024;
+}
+
+http {
+  include /etc/nginx/mime.types;
+  default_type application/octet-stream;
+  access_log /dev/stdout;
+  error_log /dev/stderr info;
+  server_tokens off;
+
+  upstream opzhub_engine { server opzhub-be-app:8114; }
+  upstream web_spa       { server opzhub-web-app:8109; }
+
+  server {
+    listen 8102 ssl;
+    http2 on;
+    ssl_certificate     /etc/opzhub/certs/public/fullchain.pem;
+    ssl_certificate_key /etc/opzhub/certs/public/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    client_max_body_size 32m;
+
+    # /api/db/ is the crud module's unversioned alias for /api/v1/opzhub/db
+    # (doc 08 CRUD plan) — same upstream, matched together to avoid duplicating
+    # this proxy block per prefix.
+    location ~ ^/(api/db/|api/v1/opzhub/) {
+      proxy_pass http://opzhub_engine;
+      proxy_set_header Host $host;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # AI and mail protocol are Java -> opzhub-be-core only, never public (doc 09 §4.1)
+    location /api/v1/ai/identity/ { return 404; }
+    location /api/v1/ai/mail/ { return 404; }
+
+    # AI profile is not packed in this pass — 404 fast instead of 502 (doc 09 §4.4)
+    location /api/v1/ai/ { return 404; }
+
+    location /ws/opzhub {
+      proxy_pass http://opzhub_engine;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_set_header Host $host;
+      proxy_read_timeout 3600s;
+      proxy_send_timeout 3600s;
+      proxy_buffering off;
+    }
+
+    location /healthz {
+      access_log off;
+      return 200 "ok\n";
+      add_header Content-Type text/plain;
+    }
+
+    location / {
+      proxy_pass http://web_spa;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Proto https;
+    }
+  }
+}

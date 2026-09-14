@@ -1,0 +1,64 @@
+# dsk_ticket_attachment — files attached to a ticket. The reference
+# app's TICKET_ATTACHMENT_MASTER already stores a file_url, not inline
+# bytes — kept as designed, no fix needed here (unlike the
+# base64-in-DB anti-pattern found in other reference apps this
+# session).
+entity: dsk_ticket_attachment
+table: dsk_ticket_attachment
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: ticket_id
+    type: uuid
+    nullable: false
+  - name: file_name
+    type: text
+    nullable: false
+    max_length: 255
+  - name: original_file_name
+    type: text
+    nullable: false
+    max_length: 255
+  - name: file_size_bytes
+    type: bigint
+    nullable: false
+  - name: content_type
+    type: text
+    nullable: true
+    max_length: 100
+  - name: file_url
+    type: text
+    nullable: true
+  - name: uploaded_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_ticket_attachment_ticket
+    columns: [ticket_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: ticket_id
+    references_table: dsk_ticket
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: uploaded_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

@@ -1,0 +1,51 @@
+# mkt_journey — an automated multi-step lead nurture workflow definition.
+# flow_definition_json is jsonb (was a free-text string in the reference
+# app) — same rationale as mkt_audience.rules_json.
+entity: mkt_journey
+table: mkt_journey
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: journey_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'DRAFT'"
+    comment: DRAFT | ACTIVE | PAUSED | ARCHIVED.
+  - name: trigger_type
+    type: text
+    nullable: false
+    max_length: 24
+    comment: LEAD_CREATED | TAG_ADDED | CAMPAIGN_RESPONSE | MANUAL | CUSTOM.
+  - name: flow_definition_json
+    type: jsonb
+    nullable: true
+    comment: Node graph — steps, delays, and branch conditions.
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_journey_company_status
+    columns: [company_id, status]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

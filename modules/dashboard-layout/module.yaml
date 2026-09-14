@@ -1,0 +1,52 @@
+id: dashboard-layout
+version: 0.1.0
+title: Configurable dashboard widget layout (all apps)
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires: [identity]
+optional: []
+provides:
+  routes:
+    - /admin/dashboard-layout          # admin drag-drop editor
+    - /dashboard                       # rendered dashboard (per app, per role)
+  api_prefixes:
+    - /api/v1/opzhub/dashboard-layout
+  workers: []
+  events:
+    - dashboard.layout.updated         # fired when admin saves a role layout
+    - dashboard.layout.user.updated    # fired when user saves personalisation
+  menus:
+    - id: dashboard-layout.editor
+      parent: admin
+      title: Dashboard Layout
+      icon: icon-layout-grid
+      roles: [admin, super-admin]
+migrations:
+  backend: true        # widget_catalog, dashboard_template, dashboard_template_widget,
+                       # dashboard_layout, dashboard_layout_user
+  python: false
+seed:
+  file: db/seed/templates.yaml
+  runner: DashboardTemplateSeed
+access:
+  features:
+    - { id: catalog,     title: Widget Catalog,    actions: [c, r, u, d] }
+    - { id: templates,   title: Layout Templates,  actions: [c, r, u, d] }
+    - { id: role-layout, title: Role Layout,       actions: [r, u] }
+    - { id: my-layout,   title: My Layout,         actions: [r, u, d] }
+  default_grants:
+    - { role: super-admin, feature: catalog,     actions: [c, r, u, d] }
+    - { role: super-admin, feature: templates,   actions: [c, r, u, d] }
+    - { role: admin,       feature: role-layout, actions: [r, u] }
+    - { role: admin,       feature: templates,   actions: [r] }
+    - { role: "*",         feature: my-layout,   actions: [r, u, d] }
+notes: |
+  All SQL runs against opzmain (catalog + templates) and opzhub (layouts).
+  No layout logic is hardcoded in any application dashboard page.
+  Applications register widgets via db/seed/templates.yaml entries using
+  their own app_key. DashboardTemplateSeed upserts on every startup.
+  Architecture reference: design/docs/architecture/34-dashboard-layout-design.md

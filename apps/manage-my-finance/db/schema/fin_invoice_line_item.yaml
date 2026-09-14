@@ -1,0 +1,83 @@
+# fin_invoice_line_item — one billed line on an invoice. tax_code replaces
+# the reference app's India-specific hsn_sac_code column name — the
+# underlying concept (a company-configurable tax classification code,
+# fin_tax_code.yaml) is the same, just not hardcoded to one country's
+# scheme. entity_type/entity_id keep the reference's generic
+# "what this line bills for" pointer (e.g. a future subscription/plan
+# item) without a Postgres FK, since the referenced entity may live in an
+# optional module not yet designed (doc 22 S6.2).
+entity: fin_invoice_line_item
+table: fin_invoice_line_item
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: invoice_id
+    type: uuid
+    nullable: false
+  - name: description
+    type: text
+    nullable: false
+  - name: quantity
+    type: integer
+    nullable: false
+    default: "1"
+  - name: unit_amount
+    type: numeric
+    nullable: false
+  - name: discount_amount
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: tax_code_id
+    type: uuid
+    nullable: true
+  - name: tax_rate
+    type: numeric
+    nullable: true
+    comment: Percentage, snapshotted at invoice time even if fin_tax_code's rate changes later.
+  - name: tax_amount
+    type: numeric
+    nullable: false
+    default: "0"
+  - name: amount
+    type: numeric
+    nullable: false
+    comment: (quantity * unit_amount) - discount_amount + tax_amount.
+  - name: item_type
+    type: text
+    nullable: true
+    max_length: 24
+    comment: PRODUCT | SERVICE | ADJUSTMENT | CUSTOM.
+  - name: source_entity_type
+    type: text
+    nullable: true
+    max_length: 32
+    comment: Generic "what this line bills for" pointer (e.g. a future subscription item). Logical only, no Postgres FK.
+  - name: source_entity_id
+    type: uuid
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_invoice_line_item_invoice
+    columns: [invoice_id]
+  - name: idx_fin_invoice_line_item_tax_code
+    columns: [tax_code_id]
+foreign_keys:
+  - column: invoice_id
+    references_table: fin_invoice
+    references_column: id
+    on_delete: cascade
+    enforce: postgres
+  - column: tax_code_id
+    references_table: fin_tax_code
+    references_column: id
+    on_delete: restrict
+    enforce: postgres

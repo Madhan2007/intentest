@@ -1,0 +1,55 @@
+# ppl_person_bank_account — generic bank account list (was fixed
+# bank_name/bank_account_number/bank_ifsc/bank_branch columns on the
+# reference app's employee row). A person may have more than one account;
+# is_primary marks the one used for payouts.
+entity: ppl_person_bank_account
+table: ppl_person_bank_account
+version: 1
+database: OPZPEOPLE
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: person_id
+    type: uuid
+    nullable: false
+  - name: bank_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: account_number
+    type: text
+    nullable: false
+    max_length: 64
+    comment: Sensitive. Same access rule as ppl_person_identifier.identifier_value.
+  - name: routing_code
+    type: text
+    nullable: true
+    max_length: 32
+    comment: Generic routing/branch code (IFSC, SWIFT, ABA, sort code, ...).
+  - name: branch_name
+    type: text
+    nullable: true
+    max_length: 200
+  - name: is_primary
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_ppl_person_bank_account_person
+    columns: [person_id]
+  - name: idx_ppl_person_bank_account_person_primary
+    columns: [person_id, is_primary]
+foreign_keys:
+  - column: person_id
+    references_table: ppl_person
+    references_column: id
+    on_delete: cascade
+    enforce: postgres

@@ -1,0 +1,91 @@
+openapi: 3.0.3
+info:
+  title: ManageMyOpz Kernel API
+  version: "2026.1"
+  description: >
+    Kernel-only surface shared by every solution: health, module catalog,
+    auth bootstrap, identity login/session. Feature APIs live in each
+    module's own contracts/openapi.yaml fragment. See design/docs/architecture/04-backend-java-design.md.
+servers:
+  - url: /api/v1/opzhub
+paths:
+  /health:
+    get:
+      summary: Kernel health
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Envelope" }
+  /meta/modules:
+    get:
+      summary: Enabled modules only (never the full vendor catalog)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Envelope" }
+  /meta/auth:
+    get:
+      summary: Public login methods (pre-company; doc 18 §2.5)
+      responses:
+        "200":
+          description: OK
+  /identity/login:
+    post:
+      summary: Local password login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string, format: password }
+      responses:
+        "200":
+          description: Session established
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Envelope" }
+        "401":
+          description: Invalid credentials
+  /identity/session:
+    get:
+      summary: Current session + compact access matrix (doc 18 §4)
+      security: [{ opzhubSession: [] }]
+      responses:
+        "200": { description: OK }
+        "401": { description: Unauthenticated }
+  /identity/logout:
+    post:
+      summary: Destroy session
+      security: [{ opzhubSession: [] }]
+      responses:
+        "200": { description: OK }
+components:
+  securitySchemes:
+    opzhubSession:
+      type: apiKey
+      in: cookie
+      name: opzhub_session
+  schemas:
+    Envelope:
+      type: object
+      properties:
+        ok: { type: boolean }
+        data: {}
+        error:
+          type: object
+          nullable: true
+          properties:
+            code: { type: string }
+            kind: { type: string }
+            msg: { type: string }
+            hint: { type: string }
+            fields: { type: object }
+        correlation_id: { type: string }

@@ -1,0 +1,144 @@
+# fin_customer — the external party being billed. Distinct from this
+# platform's own company_information (the tenant running ManageMyOpz) —
+# a fin_customer is that tenant's OWN customer. No local User/Role table:
+# audit actors are cross-database logical references to id_user.id
+# (OPZUSER), the same anti-pattern fix applied across every
+# apps/manage-my-* app this session.
+entity: fin_customer
+table: fin_customer
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: customer_code
+    type: text
+    nullable: false
+    max_length: 32
+    comment: Unique per company. Generated via fin_code_sequence (sequence_type = CUSTOMER).
+  - name: first_name
+    type: text
+    nullable: true
+    max_length: 100
+  - name: last_name
+    type: text
+    nullable: true
+    max_length: 100
+  - name: display_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: company_name
+    type: text
+    nullable: true
+    max_length: 200
+  - name: email
+    type: text
+    nullable: true
+    max_length: 200
+  - name: phone
+    type: text
+    nullable: true
+    max_length: 32
+  - name: billing_line1
+    type: text
+    nullable: true
+  - name: billing_line2
+    type: text
+    nullable: true
+  - name: billing_city
+    type: text
+    nullable: true
+    max_length: 100
+  - name: billing_state
+    type: text
+    nullable: true
+    max_length: 100
+  - name: billing_postal_code
+    type: text
+    nullable: true
+    max_length: 20
+  - name: billing_country
+    type: text
+    nullable: true
+    max_length: 100
+  - name: shipping_line1
+    type: text
+    nullable: true
+  - name: shipping_line2
+    type: text
+    nullable: true
+  - name: shipping_city
+    type: text
+    nullable: true
+    max_length: 100
+  - name: shipping_state
+    type: text
+    nullable: true
+    max_length: 100
+  - name: shipping_postal_code
+    type: text
+    nullable: true
+    max_length: 20
+  - name: shipping_country
+    type: text
+    nullable: true
+    max_length: 100
+  - name: tax_registration_number
+    type: text
+    nullable: true
+    max_length: 64
+    comment: Generic tax ID (VAT/GST/EIN/...), not a hardcoded "vatNumber" field.
+  - name: is_tax_exempt
+    type: boolean
+    nullable: false
+    default: "false"
+  - name: preferred_language
+    type: text
+    nullable: true
+    max_length: 10
+  - name: preferred_currency
+    type: text
+    nullable: true
+    max_length: 3
+    comment: ISO 4217 code.
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'ACTIVE'"
+    comment: ACTIVE | ARCHIVED.
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_customer_company_code
+    columns: [company_id, customer_code]
+    unique: true
+  - name: idx_fin_customer_company_status
+    columns: [company_id, status]
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. App-enforced (doc 28 S3).
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict

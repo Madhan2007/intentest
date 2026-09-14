@@ -1,0 +1,107 @@
+# Product catalog only. License, install, and favourite live on
+# company_application for the signed-in company, never on this file.
+applications:
+  - app_key: manage-my-data
+    product_code: opz-001
+    category: data
+    display_name: Manage my Data
+    description: Centralize and manage your business data.
+    icon_key: data
+    icon_background_color: "#2563eb"
+    sort_order: 1
+  - app_key: manage-my-desk
+    product_code: opz-002
+    category: desk
+    display_name: Manage my Desk
+    description: Organize tasks, work, and daily operations.
+    icon_key: desk
+    icon_background_color: "#f97316"
+    sort_order: 2
+  - app_key: manage-my-hr
+    product_code: opz-003
+    category: hr
+    display_name: Manage my HR
+    description: Manage employees, attendance, and HR activities.
+    icon_key: hr
+    icon_background_color: "#16a34a"
+    sort_order: 3
+  - app_key: manage-my-market
+    product_code: opz-004
+    category: marketing
+    display_name: Manage my Market
+    description: Plan, manage, and track marketing activities.
+    icon_key: marketing
+    icon_background_color: "#7c3aed"
+    sort_order: 4
+  - app_key: manage-my-finance
+    product_code: opz-005
+    category: finance
+    display_name: Manage my Finance
+    description: Manage finances, expenses, and transactions.
+    icon_key: finance
+    icon_background_color: "#16a34a"
+    sort_order: 5
+  - app_key: manage-my-sales
+    product_code: opz-006
+    category: sales
+    display_name: Manage my Sales
+    description: Manage customers, leads, and sales activities.
+    icon_key: sales
+    icon_background_color: "#2563eb"
+    sort_order: 6
+  - app_key: manage-my-inventory
+    product_code: opz-007
+    category: inventory
+    display_name: Manage my Inventory
+    description: Track stock, products, and inventory operations.
+    icon_key: inventory
+    icon_background_color: "#7c3aed"
+    sort_order: 7
+  - app_key: manage-my-shop
+    product_code: opz-008
+    category: shop
+    display_name: Manage my Shop
+    description: Manage your shop, orders, and daily sales.
+    icon_key: shop
+    icon_background_color: "#f97316"
+    sort_order: 8
+  - app_key: manage-my-project
+    product_code: opz-009
+    category: project
+    display_name: Manage my Project
+    description: Plan, track, and manage projects and tasks.
+    icon_key: project
+    icon_background_color: "#64748b"
+    sort_order: 9
+  - app_key: manage-my-vault
+    product_code: opz-010
+    category: vault
+    display_name: Manage my Vault
+    description: Securely manage and access important documents.
+    icon_key: vault
+    icon_background_color: "#f97316"
+    sort_order: 10
+  - app_key: manage-my-id
+    product_code: opz-011
+    category: hr
+    display_name: Manage my ID
+    description: Manage identity records and credentials.
+    icon_key: hr
+    icon_background_color: "#64748b"
+    sort_order: 11
+  - app_key: manage-my-ticket
+    product_code: opz-012
+    category: desk
+    display_name: Manage my Ticket
+    description: Track support tickets and requests.
+    icon_key: desk
+    icon_background_color: "#2563eb"
+    sort_order: 12
+  - app_key: manage-my-claims
+    product_code: opz-013
+    category: finance
+    display_name: Manage my Claims
+    description: Submit and track claims and reimbursements.
+    icon_key: finance
+    icon_background_color: "#7c3aed"
+    sort_order: 13

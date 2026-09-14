@@ -1,0 +1,24 @@
+id: identity
+version: 0.1.0
+title: Identity, sessions & access
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires: []
+optional: []
+provides:
+  routes:
+    - /login
+  api_prefixes:
+    - /api/v1/opzhub/identity
+  workers: []
+  events: []
+  menus: []
+migrations:
+  backend: true
+  python: false
+access:
+  features: []

@@ -1,0 +1,44 @@
+# mkt_email_template — reusable email content for campaigns/journeys.
+entity: mkt_email_template
+table: mkt_email_template
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: template_name
+    type: text
+    nullable: false
+    max_length: 200
+  - name: subject
+    type: text
+    nullable: false
+    max_length: 500
+  - name: body_html
+    type: text
+    nullable: true
+  - name: body_text
+    type: text
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_email_template_company_name
+    columns: [company_id, template_name]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

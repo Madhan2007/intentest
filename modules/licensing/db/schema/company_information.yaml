@@ -1,0 +1,152 @@
+# Customer/company registry (OPZMAIN). References company_license,
+# server_details, and (when routing_mode=COMPANY_BE) backend_endpoint,
+# which must all live in the same physical database
+# (Postgres does not support cross-database foreign keys).
+#
+# version 2 additions (doc 25):
+#   company_slug    — URL-safe primary slug used in "acme/user" login format
+#   routing_mode    — CENTRAL_DB | COMPANY_BE | SITE (see doc 25 §3)
+#   endpoint_name   — FK to backend_endpoint; populated only for COMPANY_BE
+#   logo_uri        — branding path returned by the resolve endpoint
+#   status          — active | suspended | expired; gate for login resolution
+#   server_name     — changed to nullable (SITE mode may not need it; null
+#                     is valid when routing_mode=COMPANY_BE and the central
+#                     hub does not hold the company DB)
+#
+# version 3 addition (doc 35):
+#   product_key     — FK to product_catalog; which product this company was
+#                      onboarded under. Nullable during reconciliation for the
+#                      same reason company_slug is nullable (existing rows);
+#                      defaults to "managemyopz" for every new row.
+entity: company_information
+table: company_information
+version: 3
+database: OPZMAIN
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+
+  - name: company_name
+    type: text
+    nullable: false
+    max_length: 200
+
+  - name: company_slug
+    type: text
+    # Nullable to allow schema reconciler to add this column to existing tables
+    # that already have rows.  The application enforces a non-null value on
+    # every create/update path; the DB constraint is tightened by a manual
+    # migration once every legacy row has been assigned a slug.
+    nullable: true
+    max_length: 64
+    comment: >
+      URL-safe primary identifier for this company (e.g. "acme").
+      Used in the "acme/user" login field and in the resolve endpoint.
+      Must match ^[a-z0-9][a-z0-9-]{1,63}$. Unique across the platform.
+
+  # JSON array of additional reference strings, e.g. ["acme.com", "acme-corp"].
+  # Used for email-domain matching: "ada@acme.com" resolves to the company
+  # whose company_references JSONB contains "acme.com".
+  # Submit as an already-serialized JSON string via the CRUD API.
+  - name: company_references
+    type: jsonb
+    nullable: true
+
+  - name: license_code
+    type: text
+    nullable: false
+
+  # Nullable because COMPANY_BE mode may route the DB through the company's
+  # own backend; the central hub may not need a direct DB connection.
+  # CENTRAL_DB mode requires this to be non-null.
+  - name: server_name
+    type: text
+    nullable: true
+
+  - name: routing_mode
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'CENTRAL_DB'"
+    comment: >
+      Determines how login and data access are routed after company resolve.
+        CENTRAL_DB  — central FE + central BE + company-specific DB via
+                      DataRouter (server_name must be set).
+        COMPANY_BE  — central FE + company-specific BE (endpoint_name must
+                      be set) + company BE manages its own DB.
+        SITE        — full stack on the customer appliance; central resolve
+                      returns the appliance origin as both gui and api.
+
+  - name: endpoint_name
+    type: text
+    nullable: true
+    max_length: 64
+    comment: >
+      FK to backend_endpoint.endpoint_name.
+      Required when routing_mode=COMPANY_BE; null otherwise.
+
+  - name: logo_uri
+    type: text
+    nullable: true
+    max_length: 500
+    comment: >
+      Path or URL to the company logo returned by the resolve endpoint
+      so the login screen can display company branding before password entry.
+
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'active'"
+    comment: >
+      Gate for login resolution. Allowed values: active | suspended | expired.
+      Resolve returns st="bad" (generic) for non-active statuses to avoid
+      leaking the distinction between expired and unknown.
+
+  - name: product_key
+    type: text
+    nullable: true
+    max_length: 64
+    default: "'managemyopz'"
+    comment: >
+      Which product (platform/catalog/products.yaml) this company belongs
+      to. Nullable for the same reconciliation reason as company_slug —
+      the application enforces a non-null value on create/update.
+
+indexes:
+  - name: idx_company_information_license_code
+    columns: [license_code]
+  - name: idx_company_information_server_name
+    columns: [server_name]
+  - name: idx_company_information_company_slug
+    columns: [company_slug]
+    unique: true
+  - name: idx_company_information_endpoint_name
+    columns: [endpoint_name]
+  - name: idx_company_information_product_key
+    columns: [product_key]
+
+foreign_keys:
+  - column: license_code
+    references_table: company_license
+    references_column: license_code
+    on_delete: restrict
+    enforce: postgres
+  - column: server_name
+    references_table: server_details
+    references_column: server_name
+    on_delete: restrict
+    enforce: postgres
+  - column: endpoint_name
+    references_table: backend_endpoint
+    references_column: endpoint_name
+    on_delete: restrict
+    enforce: postgres
+  - column: product_key
+    references_table: product_catalog
+    references_column: product_key
+    on_delete: restrict
+    enforce: postgres

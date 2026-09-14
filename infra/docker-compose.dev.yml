@@ -1,0 +1,13 @@
+# Dev overlay (doc 17 §4): published loopback ports for IDE/debugger attach.
+# Service names and images stay identical to the prod file — never diverge.
+# Nginx's public port is NOT overridden here: the base file already
+# defaults OPZHUB_HOST_HTTPS to 8102 when no infra/.env is present, which is
+# exactly what a laptop wants (no admin rights needed to bind 443, no clash
+# with other local services).
+services:
+  opzhub-be-app:
+    ports:
+      - "127.0.0.1:8114:8114"
+  opzhub-web-app:
+    ports:
+      - "127.0.0.1:8117:8109"

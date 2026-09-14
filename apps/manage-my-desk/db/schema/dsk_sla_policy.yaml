@@ -1,0 +1,62 @@
+# dsk_sla_policy — SLA policy by severity. Matches the reference app's
+# SLA_POLICY_MASTER, including its own V18 fix (a later migration
+# dropped the original UNIQUE(company_id, severity) constraint to allow
+# multiple named policies per severity — e.g. a stricter policy for a
+# VIP client). That relaxation only makes sense if something then picks
+# which policy applies per ticket: dsk_ticket.sla_policy_id (explicit,
+# not inferred by severity lookup) completes that intent.
+entity: dsk_sla_policy
+table: dsk_sla_policy
+version: 1
+database: OPZDESK
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: policy_name
+    type: text
+    nullable: false
+    max_length: 100
+  - name: severity
+    type: text
+    nullable: false
+    max_length: 8
+    comment: SEV_1 | SEV_2 | SEV_3 | SEV_4.
+  - name: target_response_minutes
+    type: integer
+    nullable: false
+  - name: target_resolution_minutes
+    type: integer
+    nullable: false
+  - name: is_24x7_continuous
+    type: boolean
+    nullable: false
+    default: "false"
+    comment: When false, the SLA clock only runs during dsk_company_setting's working hours/work days.
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dsk_sla_policy_company_active
+    columns: [company_id, is_active]
+  - name: idx_dsk_sla_policy_company_severity
+    columns: [company_id, severity]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

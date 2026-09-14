@@ -1,0 +1,40 @@
+# mkt_lead_code_sequence — per-company, per-prefix counter for
+# mkt_lead.lead_code. Same design as the other three apps' code
+# sequences (ppl_person_code_sequence, dsk_ticket_code_sequence,
+# dat_record_code_sequence): company + prefix scoped only, no nullable
+# scope column in the unique index.
+entity: mkt_lead_code_sequence
+table: mkt_lead_code_sequence
+version: 1
+database: OPZMARKET
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: prefix
+    type: text
+    nullable: false
+    max_length: 16
+    default: "''"
+  - name: next_number
+    type: bigint
+    nullable: false
+    default: "1"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_mkt_lead_code_sequence_company_prefix
+    columns: [company_id, prefix]
+    unique: true
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

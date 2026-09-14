@@ -1,0 +1,49 @@
+# Backend endpoint registry (OPZMAIN). Stores REST base URLs and optional
+# inter-service credentials for company-specific backend instances.
+# Referenced by company_information.endpoint_name when routing_mode = COMPANY_BE.
+#
+# SECURITY NOTE: be_api_token is stored as plain text — same caveat as
+# server_details.db_password. Treat as a known follow-up: encrypt at the
+# application layer before write, or store a reference into a secrets manager
+# here instead of the raw credential.
+entity: backend_endpoint
+table: backend_endpoint
+version: 1
+database: OPZMAIN
+columns:
+  - name: endpoint_name
+    type: text
+    primary_key: true
+    nullable: false
+    max_length: 64
+    comment: >
+      Natural key. URL-safe name identifying this company BE instance,
+      e.g. "acme-be-prod".
+  - name: be_api_url
+    type: text
+    nullable: false
+    comment: >
+      REST base URL of the company backend, e.g. https://acme-be.example.com.
+      The central hub returns this as the "api" field in the resolve response
+      so the browser routes POST /login (and all further calls) to this origin.
+  - name: be_health_url
+    type: text
+    nullable: true
+    comment: >
+      Optional health-check path relative to be_api_url, e.g. /healthz.
+      Used by opzhubctl doctor to verify company BE reachability.
+  - name: be_api_token
+    type: text
+    nullable: true
+    comment: >
+      Optional bearer token for hub-to-company-BE inter-service calls
+      (e.g., license preflight forwarded by the hub). Not sent to browsers.
+  - name: is_active
+    type: boolean
+    nullable: false
+    default: "true"
+    comment: >
+      When false the endpoint is treated as unreachable; resolve returns
+      st="bad" for associated companies.
+indexes: []
+foreign_keys: []

@@ -1,0 +1,61 @@
+# Identity user table — schema definition (kernel com.managemyopz.kernel.data.schema).
+# Read by SchemaRegistry at startup; the table is created/altered additively by
+# SchemaReconciler against the OPZUSER database (see IdentityDataConstants.DATABASE_NAME).
+# expose_generic_api is false: id_user must never be reachable through the generic
+# /api/v1/opzhub/db/{entity}/* CRUD routes (it holds password_hash) — identity keeps
+# its own dedicated login/session commands (identity.find_user_by_username.sql,
+# identity.create_user.sql, identity.count_users.sql) for all reads/writes.
+entity: id_user
+table: id_user
+version: 1
+database: OPZUSER
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: username
+    type: text
+    nullable: false
+    unique: true
+  - name: email
+    type: text
+    nullable: true
+    unique: true
+  - name: display_name
+    type: text
+    nullable: false
+  - name: password_hash
+    type: text
+    nullable: false
+  - name: roles
+    type: text_array
+    nullable: false
+    default: "'{}'"
+  - name: enabled
+    type: boolean
+    nullable: false
+    default: 'true'
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+  - name: last_login_at
+    type: timestamptz
+    nullable: true
+  - name: company_id
+    type: uuid
+    nullable: true
+indexes:
+  - name: idx_id_user_company_username
+    columns: [company_id, username]
+    unique: true
+foreign_keys:
+  # Cross-database: company_information lives on OPZMAIN. The kernel enforces
+  # this at write time; Postgres cannot create the constraint across databases.
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

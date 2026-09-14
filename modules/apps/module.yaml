@@ -1,0 +1,23 @@
+id: apps
+version: 0.1.0
+title: Application catalog and company installations (OPZHUB)
+runtimes:
+  frontend: false
+  mobile: false
+  backend: true
+  python: false
+  scripts: false
+requires: []
+optional: []
+provides:
+  routes: []
+  api_prefixes:
+    - /api/v1/opzhub/apps
+  workers: []
+  events: []
+  menus: []
+migrations:
+  backend: true
+  python: false
+access:
+  features: []

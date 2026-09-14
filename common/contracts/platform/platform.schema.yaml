@@ -1,0 +1,39 @@
+# JSON-Schema-ish contract for platform.yaml (doc 08). Kept as YAML for readability;
+# opzhubctl doctor loads this to validate the merged configuration.
+schema_version: "2026.1"
+type: object
+required: [schema_version, solution, db, cache, broker]
+properties:
+  solution:
+    type: object
+    required: [id, profile]
+    properties:
+      profile: { enum: [dev, staging, prod] }
+  db:
+    type: object
+    required: [type]
+    properties:
+      type: { enum: [postgres, memory] }
+  cache:
+    type: object
+    required: [type]
+    properties:
+      type: { enum: [valkey, memory] }
+  broker:
+    type: object
+    required: [type]
+    properties:
+      type: { enum: [valkey, memory] }
+      # kafka is reserved and intentionally not accepted — doctor fails (doc 11)
+  security:
+    type: object
+    properties:
+      allow_open_dev: { type: boolean }
+      tls:
+        type: object
+        properties:
+          mode: { enum: [required, none] }
+rules:
+  - "profile=prod => allow_open_dev=false, tls.mode=required, db.type=postgres, cache.type=valkey, broker.type=valkey"
+  - "profile=dev => memory stores allowed"
+  - "broker.type=kafka is always rejected in this drop (doc 11)"

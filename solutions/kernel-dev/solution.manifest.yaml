@@ -1,0 +1,20 @@
+schema_version: "2026.1"
+solution:
+  id: kernel-dev
+  display_name: ManageMyOpz Kernel (dev)
+  kernel_min: "2026.1"
+
+modules:
+  enabled:
+    - identity
+    - admin
+    - crud
+    - licensing
+  disabled: []
+
+branding:
+  theme_override: ./branding/theme.override.json
+  rich_dir: ./branding/rich
+
+packaging:
+  drop_unused_module_folders: true

@@ -1,0 +1,22 @@
+id: licensing
+version: 0.1.0
+title: Company / license / server registry (OPZMAIN)
+runtimes:
+  frontend: false
+  mobile: false
+  backend: false
+  python: false
+  scripts: false
+requires: []
+optional: []
+provides:
+  routes: []
+  api_prefixes: []
+  workers: []
+  events: []
+  menus: []
+migrations:
+  backend: true
+  python: false
+access:
+  features: []

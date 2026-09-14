@@ -1,0 +1,72 @@
+# fin_refund — money returned to a customer against a payment. Same
+# "wired-but-fieldless in the reference" note as fin_payment_transaction.yaml.
+entity: fin_refund
+table: fin_refund
+version: 1
+database: OPZFINANCE
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: payment_transaction_id
+    type: uuid
+    nullable: false
+  - name: customer_id
+    type: uuid
+    nullable: false
+  - name: amount
+    type: numeric
+    nullable: false
+  - name: currency
+    type: text
+    nullable: false
+    max_length: 3
+  - name: status
+    type: text
+    nullable: false
+    max_length: 16
+    default: "'PENDING'"
+    comment: PENDING | PROCESSED | FAILED.
+  - name: reason
+    type: text
+    nullable: true
+  - name: processed_at
+    type: timestamptz
+    nullable: true
+  - name: created_by_user_id
+    type: uuid
+    nullable: true
+    comment: Cross-database logical FK to id_user.id (OPZUSER).
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_fin_refund_company_status
+    columns: [company_id, status]
+  - name: idx_fin_refund_payment
+    columns: [payment_transaction_id]
+foreign_keys:
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict
+  - column: payment_transaction_id
+    references_table: fin_payment_transaction
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: customer_id
+    references_table: fin_customer
+    references_column: id
+    on_delete: restrict
+    enforce: postgres
+  - column: created_by_user_id
+    references_table: id_user
+    references_column: id
+    on_delete: restrict
