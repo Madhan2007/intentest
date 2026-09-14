@@ -1,0 +1,52 @@
+form_key: lead_edit
+app_key: manage-my-market
+title: Edit Lead
+target_entity: mkt_lead
+api_endpoint: /api/v1/opzhub/manage-my-market/leads/{id}
+method: PUT
+fields:
+  - name: displayName
+    type: text
+    label: Display Name
+    required: true
+  - name: companyName
+    type: text
+    label: Company
+    required: false
+  - name: email
+    type: email
+    label: Email
+    required: false
+  - name: phone
+    type: text
+    label: Phone
+    required: false
+  - name: status
+    type: choice
+    label: Status
+    required: true
+    options:
+      - { value: NEW, label: New }
+      - { value: CONTACTED, label: Contacted }
+      - { value: QUALIFIED, label: Qualified }
+      - { value: PROPOSAL, label: Proposal }
+      - { value: NEGOTIATION, label: Negotiation }
+      - { value: WON, label: Won }
+      - { value: LOST, label: Lost }
+  - name: estimatedValue
+    type: number
+    label: Estimated Value ($)
+    required: false
+  - name: priority
+    type: choice
+    label: Priority
+    required: false
+    options:
+      - { value: LOW, label: Low }
+      - { value: MEDIUM, label: Medium }
+      - { value: HIGH, label: High }
+      - { value: URGENT, label: Urgent }
+  - name: notes
+    type: text
+    label: Notes
+    required: false

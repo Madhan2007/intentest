@@ -1,0 +1,38 @@
+entity: dashboard_template_widget
+table: dashboard_template_widget
+version: 1
+database: OPZMAIN
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: template_key
+    type: text
+    nullable: false
+  - name: widget_key
+    type: text
+    nullable: false
+  - name: zone_key
+    type: text
+    nullable: false
+  - name: position
+    type: jsonb
+    nullable: false
+  - name: widget_props
+    type: jsonb
+    nullable: true
+indexes:
+  - name: idx_dtw_template_key
+    columns: [template_key]
+foreign_keys:
+  - column: template_key
+    references_table: dashboard_template
+    references_column: template_key
+    on_delete: cascade
+  - column: widget_key
+    references_table: widget_catalog
+    references_column: widget_key
+    on_delete: cascade

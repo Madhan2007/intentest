@@ -1,0 +1,55 @@
+# Built-in Dashboard Layout Templates (doc 34 §2.3)
+templates:
+  - template_key: market-default
+    app_key: manage-my-market
+    template_name: Marketing Overview Default
+    description: Default marketing dashboard layout with KPIs, lead funnel, campaign performance, and recent activity
+    widgets:
+      - widget_key: mkt-kpi-leads
+        zone_key: header_bar
+        x: 0
+        y: 0
+        w: 3
+        h: 1
+      - widget_key: mkt-kpi-conversion
+        zone_key: header_bar
+        x: 3
+        y: 0
+        w: 3
+        h: 1
+      - widget_key: mkt-kpi-campaigns
+        zone_key: header_bar
+        x: 6
+        y: 0
+        w: 3
+        h: 1
+      - widget_key: mkt-kpi-telecalling
+        zone_key: header_bar
+        x: 9
+        y: 0
+        w: 3
+        h: 1
+      - widget_key: mkt-lead-funnel
+        zone_key: main_grid
+        x: 0
+        y: 0
+        w: 6
+        h: 4
+      - widget_key: mkt-campaign-roi
+        zone_key: main_grid
+        x: 6
+        y: 0
+        w: 6
+        h: 4
+      - widget_key: mkt-recent-leads
+        zone_key: main_grid
+        x: 0
+        y: 4
+        w: 6
+        h: 4
+      - widget_key: mkt-call-queue-status
+        zone_key: main_grid
+        x: 6
+        y: 4
+        w: 6
+        h: 4

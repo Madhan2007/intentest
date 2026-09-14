@@ -1,0 +1,33 @@
+roles:
+  - role_code: market_admin
+    role_title: Marketing Administrator
+    is_system: true
+    permissions:
+      - { module: manage-my-market, feature: led, permissions: vcud }
+      - { module: manage-my-market, feature: cmp, permissions: vcud }
+      - { module: manage-my-market, feature: jny, permissions: vcud }
+      - { module: manage-my-market, feature: cal, permissions: vcud }
+      - { module: manage-my-market, feature: ref, permissions: vcud }
+      - { module: manage-my-market, feature: agt, permissions: vcud }
+  - role_code: market_manager
+    role_title: Campaign Manager
+    is_system: true
+    permissions:
+      - { module: manage-my-market, feature: led, permissions: vcu }
+      - { module: manage-my-market, feature: cmp, permissions: vcu }
+      - { module: manage-my-market, feature: jny, permissions: vcu }
+      - { module: manage-my-market, feature: cal, permissions: v }
+      - { module: manage-my-market, feature: ref, permissions: v }
+  - role_code: market_telecaller
+    role_title: Telemarketing Agent
+    is_system: true
+    permissions:
+      - { module: manage-my-market, feature: led, permissions: vu }
+      - { module: manage-my-market, feature: cal, permissions: vcu }
+      - { module: manage-my-market, feature: agt, permissions: v }
+  - role_code: market_field_agent
+    role_title: Field Marketing Agent
+    is_system: true
+    permissions:
+      - { module: manage-my-market, feature: led, permissions: vu }
+      - { module: manage-my-market, feature: agt, permissions: v }

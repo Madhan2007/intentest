@@ -1,0 +1,12 @@
+form_key: lead_disqualify
+app_key: manage-my-market
+title: Disqualify Lead
+target_entity: mkt_lead
+api_endpoint: /api/v1/opzhub/manage-my-market/leads/{id}/disqualify
+method: POST
+fields:
+  - name: reason
+    type: text
+    label: Disqualification Reason
+    required: true
+    hint: Explain why this lead does not fit the target customer profile.

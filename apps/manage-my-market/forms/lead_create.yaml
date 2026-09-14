@@ -1,0 +1,63 @@
+form_key: lead_create
+app_key: manage-my-market
+title: Create Lead
+target_entity: mkt_lead
+api_endpoint: /api/v1/opzhub/manage-my-market/leads
+method: POST
+fields:
+  - name: firstName
+    type: text
+    label: First Name
+    required: true
+  - name: lastName
+    type: text
+    label: Last Name
+    required: false
+  - name: displayName
+    type: text
+    label: Display / Full Name
+    required: true
+  - name: companyName
+    type: text
+    label: Company / Organization
+    required: false
+  - name: email
+    type: email
+    label: Business Email
+    required: false
+  - name: phone
+    type: text
+    label: Phone / Mobile
+    required: false
+  - name: leadSourceType
+    type: choice
+    label: Lead Source
+    required: true
+    default: INBOUND_WEB
+    options:
+      - { value: INBOUND_WEB, label: Website Form }
+      - { value: GOOGLE_ADS, label: Google Ads }
+      - { value: META_ADS, label: Meta / Instagram Ads }
+      - { value: LINKEDIN, label: LinkedIn }
+      - { value: COLD_CALL, label: Cold Call }
+      - { value: REFERRAL, label: Referral }
+      - { value: EVENT, label: Event }
+  - name: estimatedValue
+    type: number
+    label: Estimated Deal Value ($)
+    required: false
+    default: 10000
+  - name: priority
+    type: choice
+    label: Priority
+    required: false
+    default: MEDIUM
+    options:
+      - { value: LOW, label: Low }
+      - { value: MEDIUM, label: Medium }
+      - { value: HIGH, label: High }
+      - { value: URGENT, label: Urgent }
+  - name: notes
+    type: text
+    label: Initial Notes
+    required: false

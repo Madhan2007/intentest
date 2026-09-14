@@ -18,6 +18,7 @@ export default defineConfig({
     alias: {
       "@kernel": path.resolve(__dirname, "src"),
       "@modules": path.resolve(__dirname, "../../modules"),
+      "@apps": path.resolve(__dirname, "../../apps"),
       "react": path.resolve(__dirname, "node_modules/react"),
       "react-dom": path.resolve(__dirname, "node_modules/react-dom"),
       "react-router-dom": path.resolve(__dirname, "node_modules/react-router-dom"),
@@ -27,7 +28,11 @@ export default defineConfig({
   server: {
     port: 5173,
     fs: {
-      allow: [path.resolve(__dirname, "."), path.resolve(__dirname, "../../modules")],
+      allow: [
+        path.resolve(__dirname, "."),
+        path.resolve(__dirname, "../../modules"),
+        path.resolve(__dirname, "../../apps"),
+      ],
     },
     proxy: {
       // Same-origin from the browser's point of view — avoids CORS in dev,

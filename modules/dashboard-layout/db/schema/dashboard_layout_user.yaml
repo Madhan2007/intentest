@@ -1,0 +1,40 @@
+entity: dashboard_layout_user
+table: dashboard_layout_user
+version: 1
+database: OPZHUB
+expose_generic_api: false
+columns:
+  - name: id
+    type: uuid
+    primary_key: true
+    nullable: false
+    default: gen_random_uuid()
+  - name: user_id
+    type: uuid
+    nullable: false
+  - name: company_id
+    type: uuid
+    nullable: false
+  - name: app_key
+    type: text
+    nullable: false
+  - name: layout_data
+    type: jsonb
+    nullable: false
+  - name: updated_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dashboard_layout_user_lookup
+    columns: [user_id, company_id, app_key]
+    unique: true
+foreign_keys:
+  - column: user_id
+    references_table: id_user
+    references_column: id
+    on_delete: cascade
+  - column: company_id
+    references_table: company_information
+    references_column: id
+    on_delete: restrict

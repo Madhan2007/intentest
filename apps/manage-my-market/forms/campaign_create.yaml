@@ -1,0 +1,38 @@
+form_key: campaign_create
+app_key: manage-my-market
+title: Create Campaign
+target_entity: mkt_campaign
+api_endpoint: /api/v1/opzhub/manage-my-market/campaigns
+method: POST
+fields:
+  - name: name
+    type: text
+    label: Campaign Name
+    required: true
+  - name: objective
+    type: choice
+    label: Marketing Objective
+    required: true
+    default: LEAD_GENERATION
+    options:
+      - { value: LEAD_GENERATION, label: Lead Generation }
+      - { value: BRAND_AWARENESS, label: Brand Awareness }
+      - { value: PRODUCT_LAUNCH, label: Product Launch }
+      - { value: RETENTION, label: Customer Retention }
+  - name: budget
+    type: number
+    label: Total Budget ($)
+    required: true
+    default: 5000
+  - name: startDate
+    type: text
+    label: Start Date
+    required: true
+  - name: endDate
+    type: text
+    label: End Date
+    required: true
+  - name: utmCampaign
+    type: text
+    label: UTM Campaign Tag
+    required: false

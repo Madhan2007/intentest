@@ -7,9 +7,11 @@ library;
 /// of copying files.
 import 'package:opzhub_mobile/modules/identity/mobile/plugin.dart' as identity;
 import 'package:opzhub_mobile/modules/admin/mobile/plugin.dart' as admin;
+import 'package:opzhub_mobile/apps/manage-my-market/mobile/plugin.dart' as market;
 import 'package:opzhub_mobile/kernel/types.dart';
 
 final List<ModulePlugin> modulePlugins = [
   identity.IdentityPlugin(),
   admin.AdminPlugin(),
+  market.ManageMyMarketPlugin(),
 ];

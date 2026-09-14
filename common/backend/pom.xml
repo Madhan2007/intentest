@@ -106,6 +106,8 @@
                 <source>../../modules/admin/backend/src/main/java</source>
                 <source>../../modules/crud/backend/src/main/java</source>
                 <source>../../modules/apps/backend/src/main/java</source>
+                <source>../../modules/dashboard-layout/backend/src/main/java</source>
+                <source>../../apps/manage-my-market/backend/src/main/java</source>
               </sources>
             </configuration>
           </execution>
@@ -154,6 +156,26 @@
                     <include>db/seed/**/*.yaml</include>
                   </includes>
                 </resource>
+                <resource>
+                  <directory>../../modules/dashboard-layout</directory>
+                  <targetPath>modules/dashboard-layout</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/commands/**/*.sql</include>
+                    <include>db/schema/**/*.yaml</include>
+                    <include>db/seed/**/*.yaml</include>
+                  </includes>
+                </resource>
+                <resource>
+                  <directory>../../apps/manage-my-market</directory>
+                  <targetPath>modules/manage-my-market</targetPath>
+                  <includes>
+                    <include>module.yaml</include>
+                    <include>db/commands/**/*.sql</include>
+                    <include>db/schema/**/*.yaml</include>
+                    <include>db/seed/**/*.yaml</include>
+                  </includes>
+                </resource>
               </resources>
             </configuration>
           </execution>
@@ -189,6 +211,8 @@
                 <source>../../modules/crud/backend/src/test/java</source>
                 <source>../../modules/identity/backend/src/test/java</source>
                 <source>../../modules/apps/backend/src/test/java</source>
+                <source>../../modules/dashboard-layout/backend/src/test/java</source>
+                <source>../../apps/manage-my-market/backend/src/test/java</source>
               </sources>
             </configuration>
           </execution>

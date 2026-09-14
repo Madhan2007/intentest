@@ -1,0 +1,77 @@
+id: manage-my-market
+version: 0.1.0
+title: Manage my Market (Marketing, Leads, Campaigns, Journeys, Telemarketing & Referrals)
+runtimes:
+  frontend: true
+  mobile: true
+  backend: true
+  python: false
+  scripts: false
+requires:
+  - identity
+  - company-setup
+  - apps
+optional:
+  - manage-my-people
+provides:
+  routes:
+    - /market
+    - /market/leads
+    - /market/campaigns
+    - /market/journeys
+    - /market/call-queues
+    - /market/referrers
+    - /market/reports
+    - /market/dashboard
+  api_prefixes:
+    - /api/v1/opzhub/manage-my-market
+  workers: []
+  events:
+    - market.lead.created
+    - market.lead.converted
+    - market.lead.assigned
+    - market.campaign.launched
+    - market.call.completed
+    - market.reward.awarded
+  menus:
+    - id: market.dashboard
+      title: Dashboard
+      icon: icon-layout-grid
+      route: /market/dashboard
+    - id: market.leads
+      title: Leads
+      icon: icon-users
+      route: /market/leads
+    - id: market.campaigns
+      title: Campaigns
+      icon: icon-send
+      route: /market/campaigns
+    - id: market.journeys
+      title: Journeys
+      icon: icon-git-branch
+      route: /market/journeys
+    - id: market.call-queues
+      title: Call Queues
+      icon: icon-phone
+      route: /market/call-queues
+    - id: market.referrers
+      title: Referrals
+      icon: icon-award
+      route: /market/referrers
+    - id: market.reports
+      title: Reports
+      icon: icon-bar-chart
+      route: /market/reports
+migrations:
+  backend: true
+  python: false
+seed:
+  file: db/seed/market_roles.yaml
+access:
+  features:
+    - { id: led, title: Lead Management, actions: [c, r, u, d] }
+    - { id: cmp, title: Campaigns, actions: [c, r, u, d] }
+    - { id: jny, title: Journeys, actions: [c, r, u, d] }
+    - { id: cal, title: Telemarketing / Call Queue, actions: [c, r, u, d] }
+    - { id: ref, title: Referral Programs, actions: [c, r, u, d] }
+    - { id: agt, title: Agent Profile, actions: [c, r, u, d] }

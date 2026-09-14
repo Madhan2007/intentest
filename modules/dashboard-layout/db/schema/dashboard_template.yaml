@@ -1,0 +1,36 @@
+entity: dashboard_template
+table: dashboard_template
+version: 1
+database: OPZMAIN
+expose_generic_api: false
+columns:
+  - name: template_key
+    type: text
+    primary_key: true
+    nullable: false
+  - name: app_key
+    type: text
+    nullable: false
+  - name: template_name
+    type: text
+    nullable: false
+  - name: description
+    type: text
+    nullable: true
+  - name: thumbnail_uri
+    type: text
+    nullable: true
+  - name: is_builtin
+    type: boolean
+    nullable: false
+    default: 'true'
+  - name: created_by
+    type: uuid
+    nullable: true
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_dashboard_template_app_key
+    columns: [app_key]

@@ -1,0 +1,33 @@
+form_key: call_log_create
+app_key: manage-my-market
+title: Log Call
+target_entity: mkt_call_log
+api_endpoint: /api/v1/opzhub/manage-my-market/calls/logs
+method: POST
+fields:
+  - name: leadId
+    type: text
+    label: Lead ID
+    required: true
+  - name: callOutcome
+    type: choice
+    label: Call Outcome
+    required: true
+    default: CONNECTED
+    options:
+      - { value: CONNECTED, label: Connected }
+      - { value: INTERESTED, label: Interested / Prospect }
+      - { value: NOT_INTERESTED, label: Not Interested }
+      - { value: NO_ANSWER, label: No Answer }
+      - { value: BUSY, label: Busy }
+      - { value: CALLBACK_REQUESTED, label: Callback Requested }
+      - { value: WRONG_NUMBER, label: Wrong Number }
+  - name: callDurationSeconds
+    type: number
+    label: Call Duration (seconds)
+    required: true
+    default: 120
+  - name: notes
+    type: text
+    label: Call Notes & Disposition
+    required: false

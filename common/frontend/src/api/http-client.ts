@@ -79,6 +79,17 @@ export const httpOpzhub = {
       method: HTTP_DEFAULTS.postMethod,
       body: buildPostBody(body),
     }),
+  put: <T>(path: string, body?: unknown, init?: RequestInit) =>
+    request<T>(buildPath(API_PREFIX.opzhub, path), {
+      ...init,
+      method: "PUT",
+      body: buildPostBody(body),
+    }),
+  delete: <T>(path: string, init?: RequestInit) =>
+    request<T>(buildPath(API_PREFIX.opzhub, path), {
+      ...init,
+      method: "DELETE",
+    }),
 };
 
 /** HTTP client to the Python AI engine (doc 03 §2). Unused until an AI-backed module is packed. */

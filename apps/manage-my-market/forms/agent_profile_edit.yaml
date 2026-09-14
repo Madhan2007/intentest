@@ -1,0 +1,35 @@
+form_key: agent_profile_edit
+app_key: manage-my-market
+title: Agent Telephony Profile
+target_entity: mkt_agent_profile
+api_endpoint: /api/v1/opzhub/manage-my-market/agents/me
+method: PUT
+fields:
+  - name: extensionNumber
+    type: text
+    label: Phone / SIP Extension
+    required: false
+  - name: skills
+    type: text
+    label: Skills & Specializations
+    required: false
+  - name: dailyTargetCalls
+    type: number
+    label: Daily Call Target
+    required: false
+    default: 40
+  - name: dailyTargetWon
+    type: number
+    label: Daily Deals Target
+    required: false
+    default: 2
+  - name: status
+    type: choice
+    label: Current Status
+    required: true
+    default: AVAILABLE
+    options:
+      - { value: AVAILABLE, label: Available }
+      - { value: ON_CALL, label: On Call }
+      - { value: BREAK, label: On Break }
+      - { value: OFFLINE, label: Offline }

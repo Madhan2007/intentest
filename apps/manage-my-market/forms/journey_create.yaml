@@ -1,0 +1,25 @@
+form_key: journey_create
+app_key: manage-my-market
+title: Create Journey
+target_entity: mkt_journey
+api_endpoint: /api/v1/opzhub/manage-my-market/journeys
+method: POST
+fields:
+  - name: name
+    type: text
+    label: Journey Name
+    required: true
+  - name: description
+    type: text
+    label: Description
+    required: false
+  - name: triggerType
+    type: choice
+    label: Enrollment Trigger
+    required: true
+    default: LEAD_CREATED
+    options:
+      - { value: LEAD_CREATED, label: When New Lead is Created }
+      - { value: STAGE_CHANGED, label: When Lead Stage Changes }
+      - { value: SCORE_THRESHOLD, label: When Lead Score Exceeds Threshold }
+      - { value: MANUAL, label: Manual Enrollment }

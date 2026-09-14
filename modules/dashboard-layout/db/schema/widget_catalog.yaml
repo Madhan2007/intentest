@@ -1,0 +1,58 @@
+entity: widget_catalog
+table: widget_catalog
+version: 1
+database: OPZMAIN
+expose_generic_api: false
+columns:
+  - name: widget_key
+    type: text
+    primary_key: true
+    nullable: false
+  - name: app_key
+    type: text
+    nullable: false
+  - name: widget_name
+    type: text
+    nullable: false
+  - name: description
+    type: text
+    nullable: true
+  - name: icon_key
+    type: text
+    nullable: true
+  - name: default_zone
+    type: text
+    nullable: false
+  - name: default_w
+    type: integer
+    nullable: false
+  - name: default_h
+    type: integer
+    nullable: false
+  - name: min_w
+    type: integer
+    nullable: false
+  - name: min_h
+    type: integer
+    nullable: false
+  - name: props_schema
+    type: jsonb
+    nullable: true
+  - name: allowed_roles
+    type: text_array
+    nullable: true
+  - name: is_system
+    type: boolean
+    nullable: false
+    default: 'false'
+  - name: status
+    type: text
+    nullable: false
+    default: "'active'"
+  - name: created_at
+    type: timestamptz
+    nullable: false
+    default: now()
+indexes:
+  - name: idx_widget_catalog_app_key
+    columns: [app_key]

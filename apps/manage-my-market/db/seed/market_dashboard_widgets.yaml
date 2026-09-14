@@ -1,0 +1,112 @@
+widgets:
+  - widget_key: mkt-kpi-leads
+    app_key: manage-my-market
+    widget_name: Total & New Leads
+    description: Key performance indicator card showing total leads and new leads today
+    icon_key: icon-users
+    default_zone: header_bar
+    default_w: 3
+    default_h: 1
+    min_w: 2
+    min_h: 1
+    allowed_roles: [market_admin, market_manager, market_telecaller, market_field_agent]
+    is_system: true
+    status: active
+
+  - widget_key: mkt-kpi-conversion
+    app_key: manage-my-market
+    widget_name: Lead Conversion Rate
+    description: KPI card showing lead-to-won conversion rate percentage
+    icon_key: icon-trending-up
+    default_zone: header_bar
+    default_w: 3
+    default_h: 1
+    min_w: 2
+    min_h: 1
+    allowed_roles: [market_admin, market_manager]
+    is_system: true
+    status: active
+
+  - widget_key: mkt-kpi-campaigns
+    app_key: manage-my-market
+    widget_name: Active Campaigns
+    description: KPI card showing number of running campaigns and total budget
+    icon_key: icon-send
+    default_zone: header_bar
+    default_w: 3
+    default_h: 1
+    min_w: 2
+    min_h: 1
+    allowed_roles: [market_admin, market_manager]
+    is_system: false
+    status: active
+
+  - widget_key: mkt-kpi-telecalling
+    app_key: manage-my-market
+    widget_name: Telecalling Calls Today
+    description: KPI card showing calls logged today and remaining queue items
+    icon_key: icon-phone-call
+    default_zone: header_bar
+    default_w: 3
+    default_h: 1
+    min_w: 2
+    min_h: 1
+    allowed_roles: [market_admin, market_manager, market_telecaller]
+    is_system: false
+    status: active
+
+  - widget_key: mkt-lead-funnel
+    app_key: manage-my-market
+    widget_name: Lead Pipeline Funnel
+    description: Funnel chart showing lead distribution across lifecycle stages
+    icon_key: icon-filter
+    default_zone: main_grid
+    default_w: 6
+    default_h: 4
+    min_w: 4
+    min_h: 3
+    allowed_roles: [market_admin, market_manager]
+    is_system: true
+    status: active
+
+  - widget_key: mkt-campaign-roi
+    app_key: manage-my-market
+    widget_name: Campaign Performance & Spend
+    description: Bar/area chart comparing campaign budget and attributed revenue
+    icon_key: icon-bar-chart
+    default_zone: main_grid
+    default_w: 6
+    default_h: 4
+    min_w: 4
+    min_h: 3
+    allowed_roles: [market_admin, market_manager]
+    is_system: false
+    status: active
+
+  - widget_key: mkt-recent-leads
+    app_key: manage-my-market
+    widget_name: Recent Leads
+    description: Live table of latest incoming leads with quick actions
+    icon_key: icon-clock
+    default_zone: main_grid
+    default_w: 6
+    default_h: 4
+    min_w: 4
+    min_h: 3
+    allowed_roles: [market_admin, market_manager, market_telecaller, market_field_agent]
+    is_system: false
+    status: active
+
+  - widget_key: mkt-call-queue-status
+    app_key: manage-my-market
+    widget_name: Agent Call Queue Status
+    description: Live list of pending telecalling queue items for assigned agent
+    icon_key: icon-list
+    default_zone: main_grid
+    default_w: 6
+    default_h: 4
+    min_w: 4
+    min_h: 3
+    allowed_roles: [market_admin, market_manager, market_telecaller]
+    is_system: false
+    status: active
