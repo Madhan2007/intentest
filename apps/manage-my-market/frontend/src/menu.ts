@@ -10,6 +10,7 @@ export const MARKET_MENU_ITEMS: MenuItem[] = [
   {
     id: "market",
     label: "Marketing",
+    path: "/market/dashboard",
   },
   {
     id: "market.dashboard",

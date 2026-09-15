@@ -4,7 +4,8 @@
  * Created at: 2026-09-10
  * Description: One 9-dot launcher tile with install or uninstall actions.
  */
-import { memo, useCallback, useMemo, type DragEvent } from "react";
+import { memo, useCallback, useMemo, type DragEvent, type MouseEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { InstallIcon, MENU_ICON_SIZE, UninstallIcon } from "@kernel/icons/chromeIcons";
 import type { ApplicationItem } from "./applicationCatalog";
 import { writeDraggedApplicationId } from "./applicationDrag";
@@ -42,6 +43,7 @@ function LauncherTileComponent({
   onApplicationDragStart,
   onApplicationDragEnd,
 }: LauncherTileProps) {
+  const navigate = useNavigate();
   const isLicensed = application.licenseState === LICENSE_STATE_LICENSED;
   const isInstalled = application.licenseState === LICENSE_STATE_INSTALLED;
   const canDrag = isLicensed && !isInstalling;
@@ -49,6 +51,23 @@ function LauncherTileComponent({
   const iconStyle = useMemo(
     () => launcherIconStyle(application.licenseState, application.iconBackgroundColor),
     [application.iconBackgroundColor, application.licenseState]
+  );
+
+  const handleTileClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest("button")) {
+        return;
+      }
+      if (isInstalled) {
+        const route =
+          application.appKey === "manage-my-market" || application.appKey === "manage-my-marketing"
+            ? "/market/dashboard"
+            : `/${application.appKey.replace(/^manage-my-/, "")}`;
+        navigate(route);
+      }
+    },
+    [application.appKey, isInstalled, navigate]
   );
 
   const handleInstallClick = useCallback(() => {
@@ -75,10 +94,11 @@ function LauncherTileComponent({
     <li className={launcherTileClassName(application.licenseState)}>
       <div
         className="mmo-dash-launcher-tile-icon"
-        style={iconStyle}
+        style={{ ...iconStyle, cursor: isInstalled ? "pointer" : undefined }}
         title={tooltip}
         aria-label={tooltip}
         draggable={canDrag}
+        onClick={handleTileClick}
         onDragStart={isLicensed ? handleDragStart : undefined}
         onDragEnd={isLicensed ? onApplicationDragEnd : undefined}
       >

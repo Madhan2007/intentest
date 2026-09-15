@@ -5,6 +5,7 @@
  * Description: Reusable application catalog card with favourite and uninstall.
  */
 import { memo, useCallback, useRef, type MouseEvent, type PointerEvent } from "react";
+import { useNavigate } from "react-router-dom";
 import { useLongPress } from "@kernel/hooks/useLongPress";
 import { MENU_ICON_SIZE, StarIcon } from "@kernel/icons/chromeIcons";
 import type { ApplicationItem } from "./applicationCatalog";
@@ -40,11 +41,14 @@ function ApplicationCardComponent({
   onShowFloatingUninstallBin,
 }: ApplicationCardProps) {
   const cardRef = useRef<HTMLElement>(null);
+  const navigate = useNavigate();
+  const isLongPressedRef = useRef(false);
   const favouriteLabel = application.favourite
     ? `${DASHBOARD_CARD_UNFAVOURITE_LABEL_PREFIX} ${application.name}`
     : `${DASHBOARD_CARD_FAVOURITE_LABEL_PREFIX} ${application.name}`;
 
   const handleLongPress = useCallback(() => {
+    isLongPressedRef.current = true;
     const cardElement = cardRef.current;
     if (!cardElement) {
       return;
@@ -53,6 +57,29 @@ function ApplicationCardComponent({
   }, [application.id, onShowFloatingUninstallBin]);
 
   const { onPointerDown, onPointerUp, onPointerCancel } = useLongPress(handleLongPress, isInstalling);
+
+  const handleCardClick = useCallback(
+    (mouseEvent: MouseEvent<HTMLElement>) => {
+      if (isLongPressedRef.current) {
+        isLongPressedRef.current = false;
+        return;
+      }
+      const eventTarget = mouseEvent.target;
+      if (eventTarget instanceof Element && (eventTarget.closest("button") || eventTarget.closest(".mmo-dash-card-actions"))) {
+        return;
+      }
+      if (isInstalling || isHoldUninstallActive) {
+        return;
+      }
+      if (application.licenseState === "installed") {
+        const route = application.appKey === "manage-my-market" || application.appKey === "manage-my-marketing"
+          ? "/market/dashboard"
+          : `/${application.appKey.replace(/^manage-my-/, "")}`;
+        navigate(route);
+      }
+    },
+    [application.appKey, application.licenseState, isInstalling, isHoldUninstallActive, navigate]
+  );
 
   const handleFavouriteClick = useCallback(() => {
     void onToggleFavourite(application.id, !application.favourite);
@@ -64,6 +91,7 @@ function ApplicationCardComponent({
 
   const handlePointerDown = useCallback(
     (pointerEvent: PointerEvent<HTMLElement>) => {
+      isLongPressedRef.current = false;
       const eventTarget = pointerEvent.target;
       if (eventTarget instanceof Element && eventTarget.closest("button")) {
         return;
@@ -81,6 +109,8 @@ function ApplicationCardComponent({
     <article
       ref={cardRef}
       className={cardClassName(isInstalling, isHoldUninstallActive)}
+      style={{ cursor: application.licenseState === "installed" ? "pointer" : "default" }}
+      onClick={handleCardClick}
       onPointerDown={handlePointerDown}
       onPointerUp={onPointerUp}
       onPointerCancel={onPointerCancel}
