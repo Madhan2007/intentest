@@ -21,7 +21,7 @@ import org.springframework.context.annotation.ComponentScan;
  * try to build one from empty spring.datasource.* properties in dev/memory mode.
  */
 @SpringBootApplication(exclude = { DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class })
-@ComponentScan(basePackages = { "com.managemyopz.kernel", "com.managemyopz.modules" })
+@ComponentScan(basePackages = { "com.managemyopz.kernel", "com.managemyopz.modules", "com.managemyopz.apps" })
 public class KernelApplication {
 
     public static void main(String[] args) {

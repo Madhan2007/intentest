@@ -13,6 +13,7 @@ import com.managemyopz.kernel.data.client.DataClient;
 import com.managemyopz.kernel.data.client.Row;
 import org.springframework.stereotype.Service;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
@@ -27,7 +28,7 @@ public class MarketReportService {
     private final CacheClient cacheClient;
     private final ObjectMapper objectMapper;
 
-    public MarketReportService(DataClient dataClient, CacheClient cacheClient, ObjectMapper objectMapper) {
+    public MarketReportService(@Qualifier("marketDataClient") DataClient dataClient, CacheClient cacheClient, ObjectMapper objectMapper) {
         this.dataClient = dataClient;
         this.cacheClient = cacheClient;
         this.objectMapper = objectMapper;

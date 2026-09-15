@@ -83,104 +83,110 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnModule("manage-my-market")
 public class ManageMyMarketAutoConfiguration {
 
+    private final DataClient marketDataClient;
+
+    public ManageMyMarketAutoConfiguration(DataClientRegistry dataClientRegistry) {
+        this.marketDataClient = dataClientRegistry.forDatabase(ManageMyMarketConstants.DATABASE_NAME);
+    }
+
     @Bean
-    public DataClient marketDataClient(DataClientRegistry dataClientRegistry) {
-        return dataClientRegistry.forDatabase(ManageMyMarketConstants.DATABASE_NAME);
+    public DataClient marketDataClient() {
+        return this.marketDataClient;
     }
 
     // Repositories
     @Bean
-    public LeadRepository marketLeadRepository(DataClient marketDataClient) {
+    public LeadRepository marketLeadRepository() {
         return new DataClientLeadRepository(marketDataClient);
     }
 
     @Bean
-    public LeadCodeSequenceRepository marketLeadCodeSequenceRepository(DataClient marketDataClient) {
+    public LeadCodeSequenceRepository marketLeadCodeSequenceRepository() {
         return new DataClientLeadCodeSequenceRepository(marketDataClient);
     }
 
     @Bean
-    public LeadAssignmentRepository marketLeadAssignmentRepository(DataClient marketDataClient) {
+    public LeadAssignmentRepository marketLeadAssignmentRepository() {
         return new DataClientLeadAssignmentRepository(marketDataClient);
     }
 
     @Bean
-    public LeadActivityRepository marketLeadActivityRepository(DataClient marketDataClient) {
+    public LeadActivityRepository marketLeadActivityRepository() {
         return new DataClientLeadActivityRepository(marketDataClient);
     }
 
     @Bean
-    public LeadScoreRepository marketLeadScoreRepository(DataClient marketDataClient) {
+    public LeadScoreRepository marketLeadScoreRepository() {
         return new DataClientLeadScoreRepository(marketDataClient);
     }
 
     @Bean
-    public LeadFollowupRepository marketLeadFollowupRepository(DataClient marketDataClient) {
+    public LeadFollowupRepository marketLeadFollowupRepository() {
         return new DataClientLeadFollowupRepository(marketDataClient);
     }
 
     @Bean
-    public CampaignRepository marketCampaignRepository(DataClient marketDataClient) {
+    public CampaignRepository marketCampaignRepository() {
         return new DataClientCampaignRepository(marketDataClient);
     }
 
     @Bean
-    public CampaignChannelRepository marketCampaignChannelRepository(DataClient marketDataClient) {
+    public CampaignChannelRepository marketCampaignChannelRepository() {
         return new DataClientCampaignChannelRepository(marketDataClient);
     }
 
     @Bean
-    public CampaignRecipientRepository marketCampaignRecipientRepository(DataClient marketDataClient) {
+    public CampaignRecipientRepository marketCampaignRecipientRepository() {
         return new DataClientCampaignRecipientRepository(marketDataClient);
     }
 
     @Bean
-    public EmailTemplateRepository marketEmailTemplateRepository(DataClient marketDataClient) {
+    public EmailTemplateRepository marketEmailTemplateRepository() {
         return new DataClientEmailTemplateRepository(marketDataClient);
     }
 
     @Bean
-    public AudienceRepository marketAudienceRepository(DataClient marketDataClient) {
+    public AudienceRepository marketAudienceRepository() {
         return new DataClientAudienceRepository(marketDataClient);
     }
 
     @Bean
-    public JourneyRepository marketJourneyRepository(DataClient marketDataClient) {
+    public JourneyRepository marketJourneyRepository() {
         return new DataClientJourneyRepository(marketDataClient);
     }
 
     @Bean
-    public JourneyEnrollmentRepository marketJourneyEnrollmentRepository(DataClient marketDataClient) {
+    public JourneyEnrollmentRepository marketJourneyEnrollmentRepository() {
         return new DataClientJourneyEnrollmentRepository(marketDataClient);
     }
 
     @Bean
-    public CallQueueRepository marketCallQueueRepository(DataClient marketDataClient) {
+    public CallQueueRepository marketCallQueueRepository() {
         return new DataClientCallQueueRepository(marketDataClient);
     }
 
     @Bean
-    public CallQueueItemRepository marketCallQueueItemRepository(DataClient marketDataClient) {
+    public CallQueueItemRepository marketCallQueueItemRepository() {
         return new DataClientCallQueueItemRepository(marketDataClient);
     }
 
     @Bean
-    public CallLogRepository marketCallLogRepository(DataClient marketDataClient) {
+    public CallLogRepository marketCallLogRepository() {
         return new DataClientCallLogRepository(marketDataClient);
     }
 
     @Bean
-    public ReferrerRepository marketReferrerRepository(DataClient marketDataClient) {
+    public ReferrerRepository marketReferrerRepository() {
         return new DataClientReferrerRepository(marketDataClient);
     }
 
     @Bean
-    public ReferralRewardRepository marketReferralRewardRepository(DataClient marketDataClient) {
+    public ReferralRewardRepository marketReferralRewardRepository() {
         return new DataClientReferralRewardRepository(marketDataClient);
     }
 
     @Bean
-    public AgentProfileRepository marketAgentProfileRepository(DataClient marketDataClient) {
+    public AgentProfileRepository marketAgentProfileRepository() {
         return new DataClientAgentProfileRepository(marketDataClient);
     }
 
@@ -250,69 +256,5 @@ public class ManageMyMarketAutoConfiguration {
     @Bean
     public AgentProfileService marketAgentProfileService(AgentProfileRepository marketAgentProfileRepository) {
         return new AgentProfileService(marketAgentProfileRepository);
-    }
-
-    // REST Controllers
-    @Bean
-    public LeadController marketLeadController(LeadService marketLeadService,
-                                              LeadAssignmentService marketLeadAssignmentService,
-                                              LeadActivityService marketLeadActivityService,
-                                              LeadCodeSequenceService marketLeadCodeSequenceService) {
-        return new LeadController(marketLeadService, marketLeadAssignmentService, marketLeadActivityService, marketLeadCodeSequenceService);
-    }
-
-    @Bean
-    public LeadFollowupController marketLeadFollowupController(LeadFollowupService marketLeadFollowupService) {
-        return new LeadFollowupController(marketLeadFollowupService);
-    }
-
-    @Bean
-    public CampaignController marketCampaignController(CampaignService marketCampaignService) {
-        return new CampaignController(marketCampaignService);
-    }
-
-    @Bean
-    public EmailTemplateController marketEmailTemplateController(EmailTemplateRepository marketEmailTemplateRepository) {
-        return new EmailTemplateController(marketEmailTemplateRepository);
-    }
-
-    @Bean
-    public AudienceController marketAudienceController(AudienceRepository marketAudienceRepository) {
-        return new AudienceController(marketAudienceRepository);
-    }
-
-    @Bean
-    public JourneyController marketJourneyController(JourneyService marketJourneyService) {
-        return new JourneyController(marketJourneyService);
-    }
-
-    @Bean
-    public CallQueueController marketCallQueueController(CallQueueService marketCallQueueService) {
-        return new CallQueueController(marketCallQueueService);
-    }
-
-    @Bean
-    public ReferrerController marketReferrerController(ReferrerService marketReferrerService) {
-        return new ReferrerController(marketReferrerService);
-    }
-
-    @Bean
-    public AgentProfileController marketAgentProfileController(AgentProfileService marketAgentProfileService) {
-        return new AgentProfileController(marketAgentProfileService);
-    }
-
-    @Bean
-    public MarketReportService marketReportService(DataClient marketDataClient, CacheClient cacheClient, ObjectMapper objectMapper) {
-        return new MarketReportService(marketDataClient, cacheClient, objectMapper);
-    }
-
-    @Bean
-    public MarketReportController marketReportController(MarketReportService marketReportService) {
-        return new MarketReportController(marketReportService);
-    }
-
-    @Bean
-    public MarketWidgetDataController marketWidgetDataController(DataClient marketDataClient, MarketReportService marketReportService) {
-        return new MarketWidgetDataController(marketDataClient, marketReportService);
     }
 }

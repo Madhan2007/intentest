@@ -14,6 +14,7 @@ import com.managemyopz.kernel.security.SessionAuthentication;
 import com.managemyopz.kernel.web.ApiEnvelope;
 import com.managemyopz.kernel.web.CorrelationFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,7 @@ public class MarketWidgetDataController {
     private final DataClient dataClient;
     private final MarketReportService reportService;
 
-    public MarketWidgetDataController(DataClient dataClient, MarketReportService reportService) {
+    public MarketWidgetDataController(@Qualifier("marketDataClient") DataClient dataClient, MarketReportService reportService) {
         this.dataClient = dataClient;
         this.reportService = reportService;
     }

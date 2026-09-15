@@ -34,6 +34,7 @@ public class KernelExceptionHandler {
 
     @ExceptionHandler(DataClientException.class)
     public ResponseEntity<ApiEnvelope<Void>> onDataClient(DataClientException e, HttpServletRequest request) {
+        log.error("DataClientException on {}: {}", request.getRequestURI(), e.getMessage(), e);
         HttpStatus status = switch (e.getKind()) {
             case "not_found" -> HttpStatus.NOT_FOUND;
             case "conflict" -> HttpStatus.CONFLICT;

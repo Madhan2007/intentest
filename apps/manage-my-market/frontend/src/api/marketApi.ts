@@ -51,16 +51,16 @@ export const marketApi = {
 
   // Calls
   listCallQueues: (status = "ACTIVE") =>
-    httpOpzhub.post<any[]>("/manage-my-market/calls/queues/read", { status }),
+    httpOpzhub.post<any[]>("/manage-my-market/call-queues/read", { status }),
 
   listQueueItems: (queueId: string, status?: string) =>
-    httpOpzhub.post<any[]>(`/manage-my-market/calls/queues/${queueId}/items/read`, { status }),
+    httpOpzhub.post<any[]>(`/manage-my-market/call-queues/${queueId}/items/read`, { status }),
 
   createCallLog: (data: any) =>
-    httpOpzhub.post<any>("/manage-my-market/calls/logs", data),
+    httpOpzhub.post<any>("/manage-my-market/call-queues/items/" + (data.callQueueItemId || "general") + "/log", data),
 
   updateQueueItem: (itemId: string, data: any) =>
-    httpOpzhub.put<any>(`/manage-my-market/calls/items/${itemId}`, data),
+    httpOpzhub.put<any>(`/manage-my-market/call-queues/items/${itemId}`, data),
 
   // Referrers
   listReferrers: (status?: string) =>

@@ -5,5 +5,5 @@ FROM mkt_call_queue_item i
 JOIN mkt_lead l ON l.id = i.lead_id
 WHERE i.queue_id = :queue_id::uuid
   AND (:status IS NULL OR i.status = :status)
-  AND (:assigned_agent_user_id::uuid IS NULL OR i.assigned_agent_user_id = :assigned_agent_user_id::uuid)
+  AND (:assigned_agent_user_id IS NULL OR i.assigned_agent_user_id::text = :assigned_agent_user_id)
 ORDER BY i.priority DESC NULLS LAST, i.created_at ASC;

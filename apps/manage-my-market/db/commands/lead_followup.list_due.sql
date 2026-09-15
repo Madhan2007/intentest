@@ -3,7 +3,7 @@ SELECT f.id, f.lead_id, f.reason, f.scheduled_at, f.assigned_agent_user_id,
 FROM mkt_lead_followup f
 JOIN mkt_lead l ON l.id = f.lead_id
 WHERE l.company_id = :company_id::uuid
-  AND (:assigned_agent_user_id::uuid IS NULL OR f.assigned_agent_user_id = :assigned_agent_user_id::uuid)
+  AND (:assigned_agent_user_id IS NULL OR f.assigned_agent_user_id::text = :assigned_agent_user_id)
   AND f.status IN ('SCHEDULED', 'OVERDUE')
   AND f.scheduled_at <= :due_before::timestamptz
 ORDER BY f.scheduled_at ASC;

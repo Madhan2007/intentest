@@ -144,10 +144,18 @@ public class AuthService {
             );
             return matrix;
         }
-        if (user.roles().contains(IdentityApplicationConstants.ROLE_ADMIN)
-                && moduleCatalog.isEnabled(IdentityApplicationConstants.ADMIN_MODULE_ID)) {
+        if (user.roles().contains(IdentityApplicationConstants.ROLE_ADMIN)) {
+            if (moduleCatalog.isEnabled(IdentityApplicationConstants.ADMIN_MODULE_ID)) {
+                matrix.put(
+                    IdentityApplicationConstants.ADMIN_MODULE_ID,
+                    Map.of(
+                        IdentityApplicationConstants.WILDCARD,
+                        IdentityApplicationConstants.FULL_ACCESS
+                    )
+                );
+            }
             matrix.put(
-                IdentityApplicationConstants.ADMIN_MODULE_ID,
+                IdentityApplicationConstants.WILDCARD,
                 Map.of(
                     IdentityApplicationConstants.WILDCARD,
                     IdentityApplicationConstants.FULL_ACCESS

@@ -8,6 +8,6 @@ SELECT j.id AS journey_id,
 FROM mkt_journey j
 JOIN mkt_journey_enrollment je ON j.id = je.journey_id
 WHERE j.company_id = :company_id::uuid
-  AND (:journey_id::uuid IS NULL OR j.id = :journey_id::uuid)
+  AND (:journey_id IS NULL OR j.id::text = :journey_id)
 GROUP BY j.id, j.name, je.current_node_id
 ORDER BY j.name, enrolled_count DESC;

@@ -3,12 +3,14 @@ FROM node:20-slim AS build
 WORKDIR /src
 COPY common/frontend ./common/frontend
 COPY modules ./modules
+COPY apps ./apps
 WORKDIR /src/common/frontend
 RUN npm install --no-audit --no-fund
 # Module frontend folders live outside this project root; Node/Vite resolve
 # bare imports (react, react-router-dom) by walking up for node_modules, so
 # make it reachable there too (same fix as the local dev junction).
 RUN ln -s /src/common/frontend/node_modules /src/modules/node_modules
+RUN ln -s /src/common/frontend/node_modules /src/apps/node_modules
 RUN npm run build
 
 FROM nginx:1.27-alpine AS runtime

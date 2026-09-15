@@ -38,6 +38,10 @@ public record Row(Map<String, Object> values) {
 
     public Instant getInstant(String key) {
         Object v = values.get(key);
-        return v == null ? null : (Instant) v;
+        if (v == null) return null;
+        if (v instanceof Instant inst) return inst;
+        if (v instanceof java.sql.Timestamp ts) return ts.toInstant();
+        if (v instanceof java.time.OffsetDateTime odt) return odt.toInstant();
+        return Instant.parse(v.toString());
     }
 }
