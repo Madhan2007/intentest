@@ -36,8 +36,9 @@ public class ApplicationFolderPresence {
         if (appKey == null || !APP_KEY_PATTERN.matcher(appKey).matches()) {
             return false;
         }
+        String normalizedKey = "manage-my-marketing".equals(appKey) ? "manage-my-market" : appKey;
         for (Path root : appRoots()) {
-            Path applicationDirectory = root.resolve(appKey);
+            Path applicationDirectory = root.resolve(normalizedKey);
             if (isApplicationDirectory(applicationDirectory)) {
                 return true;
             }
